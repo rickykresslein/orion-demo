@@ -1,7 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="11134" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="23094" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11134"/>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23094"/>
+        <plugIn identifier="com.apple.WebKit2IBPlugin" version="23094"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--Application-->
@@ -673,7 +676,7 @@
                         <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
                     </connections>
                 </application>
-                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModuleProvider="target"/>
+                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Orion_Demo" customModuleProvider="target"/>
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -682,17 +685,81 @@
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
             <objects>
-                <windowController id="B8D-0N-5wS" sceneMemberID="viewController">
-                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA">
+                <windowController id="B8D-0N-5wS" customClass="MainWindowController" customModule="Orion_Demo" customModuleProvider="target" sceneMemberID="viewController">
+                    <window key="window" title="Orion" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" titleVisibility="hidden" id="IQv-IB-iLA">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="196" y="240" width="480" height="270"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
+                        <toolbar key="toolbar" implicitIdentifier="23FBB143-F7EA-4B81-8E85-FA6F6A1916C1" autosavesConfiguration="NO" showsBaselineSeparator="NO" displayMode="iconAndLabel" sizeMode="regular" id="a22-TZ-tdg">
+                            <allowedToolbarItems>
+                                <toolbarItem implicitItemIdentifier="NSToolbarShowColorsItem" id="p1g-g0-wrQ"/>
+                                <toolbarItem implicitItemIdentifier="NSToolbarShowFontsItem" id="DC9-XX-yTg"/>
+                                <toolbarItem implicitItemIdentifier="NSToolbarPrintItem" id="Gtq-bK-Sc2"/>
+                                <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="aEu-Ik-rim"/>
+                                <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="FDG-BI-fqc"/>
+                                <toolbarItem implicitItemIdentifier="CD5B2CCE-667E-48A3-A390-852B0EB05200" label="Back" paletteLabel="Back" image="chevron.backward" catalog="system" title="Textured Rounded" sizingBehavior="auto" id="xql-ef-3ka">
+                                    <nil key="toolTip"/>
+                                    <button key="view" verticalHuggingPriority="750" id="38s-cY-5p7">
+                                        <rect key="frame" x="6" y="14" width="22" height="23"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <buttonCell key="cell" type="roundTextured" title="Textured Rounded" bezelStyle="texturedRounded" image="chevron.backward" catalog="system" imagePosition="only" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Jf2-c3-P6Q">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                    </button>
+                                </toolbarItem>
+                                <toolbarItem implicitItemIdentifier="47C5BBA7-0A61-477C-919D-CEA1236F2E37" label="Add Tab Button" paletteLabel="Add Tab" image="plus" catalog="system" title="Textured Rounded" sizingBehavior="auto" id="QKY-j5-sG2">
+                                    <nil key="toolTip"/>
+                                    <button key="view" verticalHuggingPriority="750" id="ZTh-ee-ODN">
+                                        <rect key="frame" x="12" y="14" width="26" height="23"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <buttonCell key="cell" type="roundTextured" title="Textured Rounded" bezelStyle="texturedRounded" image="plus" catalog="system" imagePosition="only" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="QDU-4u-N9O">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                    </button>
+                                </toolbarItem>
+                                <toolbarItem implicitItemIdentifier="3ED87006-B1FC-4DED-A81E-3E253F41D087" label="URL Field" paletteLabel="URL Field" sizingBehavior="auto" id="PWi-Rb-xDD" userLabel="URL Field">
+                                    <nil key="toolTip"/>
+                                    <textField key="view" focusRingType="none" verticalHuggingPriority="750" id="Gdl-VG-7kt" customClass="URLTextController" customModule="Orion_Demo" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="14" width="96" height="35"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <textFieldCell key="cell" controlSize="large" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" drawsBackground="YES" usesSingleLineMode="YES" id="6Qy-Xj-AMg" customClass="FaviconURLCell" customModule="Orion_Demo" customModuleProvider="target">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                    </textField>
+                                </toolbarItem>
+                                <toolbarItem implicitItemIdentifier="F253BA0A-73E5-46CD-BCE6-338A760D8833" label="Tabs Stack" paletteLabel="Tabs Stack" tag="-1" sizingBehavior="auto" id="5no-Ti-GqD" userLabel="Tabs Stack">
+                                    <nil key="toolTip"/>
+                                    <stackView key="view" distribution="fill" orientation="horizontal" alignment="top" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" id="Qt2-Bv-SgL" customClass="TabsViewController" customModule="Orion_Demo" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="14" width="200" height="110"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <nil name="visibilityPriorities"/>
+                                    </stackView>
+                                </toolbarItem>
+                            </allowedToolbarItems>
+                            <defaultToolbarItems>
+                                <toolbarItem reference="xql-ef-3ka"/>
+                                <toolbarItem reference="FDG-BI-fqc"/>
+                                <toolbarItem reference="PWi-Rb-xDD"/>
+                                <toolbarItem reference="FDG-BI-fqc"/>
+                                <toolbarItem reference="5no-Ti-GqD"/>
+                                <toolbarItem reference="QKY-j5-sG2"/>
+                            </defaultToolbarItems>
+                        </toolbar>
                         <connections>
                             <outlet property="delegate" destination="B8D-0N-5wS" id="98r-iN-zZc"/>
                         </connections>
                     </window>
                     <connections>
+                        <outlet property="addTabButton" destination="QKY-j5-sG2" id="R5R-ZD-pja"/>
+                        <outlet property="backButton" destination="xql-ef-3ka" id="Xkx-3l-Eeq"/>
+                        <outlet property="tabsStack" destination="5no-Ti-GqD" id="peN-Th-3fI"/>
+                        <outlet property="toolbarView" destination="a22-TZ-tdg" id="M8B-92-5BT"/>
+                        <outlet property="urlField" destination="PWi-Rb-xDD" id="xZL-aM-SSu"/>
                         <segue destination="XfG-lQ-9wD" kind="relationship" relationship="window.shadowedContentViewController" id="cq2-FE-JQM"/>
                     </connections>
                 </windowController>
@@ -703,15 +770,32 @@
         <!--View Controller-->
         <scene sceneID="hIz-AP-VOD">
             <objects>
-                <viewController id="XfG-lQ-9wD" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="XfG-lQ-9wD" customClass="ViewController" customModule="Orion_Demo" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="m2S-Jp-Qdl">
                         <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <wkWebView wantsLayer="YES" fixedFrame="YES" allowsBackForwardNavigationGestures="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lj9-TG-tNw">
+                                <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <wkWebViewConfiguration key="configuration">
+                                    <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
+                                    <wkPreferences key="preferences"/>
+                                </wkWebViewConfiguration>
+                            </wkWebView>
+                        </subviews>
                     </view>
+                    <connections>
+                        <outlet property="webView" destination="lj9-TG-tNw" id="nih-Hf-BxB"/>
+                    </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="75" y="655"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="chevron.backward" catalog="system" width="10" height="14"/>
+        <image name="plus" catalog="system" width="14" height="13"/>
+    </resources>
 </document>

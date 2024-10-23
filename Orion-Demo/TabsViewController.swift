@@ -178,5 +178,9 @@ class TabsViewController: NSView {
 		}
 
 		updateTabsVisibility()
+		if let mainWindowController = (NSApp.mainWindow?.windowController as? MainWindowController)
+		{
+			mainWindowController.updateUrlBarPosition()
+		}
 	}
 }

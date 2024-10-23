@@ -5,7 +5,7 @@ class MainWindowController: NSWindowController {
 	@IBOutlet var toolbarView: NSToolbar!
 	@IBOutlet var backButton: NSToolbarItem!
 	@IBOutlet var urlField: NSToolbarItem!
-	@IBOutlet var tabsStack: NSToolbarItem!
+	@IBOutlet weak var tabsView: NSToolbarItem!
 	@IBOutlet var addTabButton: NSToolbarItem!
 
 	var urlTextField: URLTextField?
@@ -42,8 +42,16 @@ class MainWindowController: NSWindowController {
 	}
 
 	func setupTabsViewController() {
-		tabsViewController = TabsViewController()
-		tabsStack.view = tabsViewController
+		tabsViewController = TabsViewController(frame: .zero)
+		tabsViewController?.translatesAutoresizingMaskIntoConstraints = false
+		tabsView.view = tabsViewController
+
+		if let tabsViewController = tabsViewController {
+			NSLayoutConstraint.activate([
+				tabsViewController.widthAnchor.constraint(greaterThanOrEqualToConstant: 200),
+				tabsViewController.heightAnchor.constraint(equalToConstant: 28)
+			])
+		}
 	}
 
 	func setupAddTabButton() {

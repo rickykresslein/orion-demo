@@ -1,41 +1,71 @@
 import Cocoa
 
-class TabsViewController: NSStackView {
+class TabsViewController: NSView {
+	private var stackView: NSStackView!
+	private var scrollView: NSScrollView!
     var tabs: [Tab] = []
     var tabViews: [NSView] = []
     var selectedTabIndex: Int = 0
 
-    override init(frame frameRect: NSRect) {
-        super.init(frame: frameRect)
-        setupTabsStackView()
-    }
+	override init(frame frameRect: NSRect) {
+		super.init(frame: frameRect)
+		setupViews()
+	}
 
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupTabsStackView()
-    }
+	required init?(coder: NSCoder) {
+		super.init(coder: coder)
+		setupViews()
+	}
 
-    func setupTabsStackView() {
-        self.orientation = .horizontal
-        self.distribution = .fillEqually
-        self.spacing = 2
-    }
+	private func setupViews() {
+		scrollView = NSScrollView()
+		scrollView.hasHorizontalScroller = true
+		scrollView.hasVerticalScroller = false
+		scrollView.autohidesScrollers = true
+		scrollView.horizontalScrollElasticity = .none
+		scrollView.translatesAutoresizingMaskIntoConstraints = false
 
-    @discardableResult
-    func addTab(with url: URL) -> Tab {
-        let newTab = Tab(url: url)
-        tabs.append(newTab)
+		stackView = NSStackView()
+		stackView.orientation = .horizontal
+		stackView.distribution = .fillEqually
+		stackView.spacing = 2
+		stackView.translatesAutoresizingMaskIntoConstraints = false
 
-        let tabView = createTabView(for: newTab)
-        tabViews.append(tabView)
-        self.addArrangedSubview(tabView)
+		scrollView.documentView = stackView
+		addSubview(scrollView)
 
-        selectTab(at: tabs.count - 1)
-        updateTabsVisibility()
-        animateTabAddition()
+		NSLayoutConstraint.activate([
+			scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
+			scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
+			scrollView.topAnchor.constraint(equalTo: topAnchor),
+			scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
 
-        return newTab
-    }
+			stackView.topAnchor.constraint(equalTo: scrollView.contentView.topAnchor),
+			stackView.bottomAnchor.constraint(equalTo: scrollView.contentView.bottomAnchor),
+			stackView.heightAnchor.constraint(equalTo: scrollView.heightAnchor)
+		])
+	}
+
+	@discardableResult
+	func addTab(with url: URL) -> Tab {
+		let newTab = Tab(url: url)
+		tabs.append(newTab)
+
+		let tabView = createTabView(for: newTab)
+		tabViews.append(tabView)
+		stackView.addArrangedSubview(tabView)
+
+		tabView.translatesAutoresizingMaskIntoConstraints = false
+		NSLayoutConstraint.activate([
+			tabView.widthAnchor.constraint(greaterThanOrEqualToConstant: 35) // Minimum width for tabs
+		])
+
+		selectTab(at: tabs.count - 1)
+		updateTabsVisibility()
+		animateTabAddition()
+
+		return newTab
+	}
 
 	func createTabView(for tab: Tab) -> NSView {
 		let tabView = NSView()
@@ -65,6 +95,8 @@ class TabsViewController: NSStackView {
 			titleLabel.leadingAnchor.constraint(equalTo: faviconImageView.trailingAnchor, constant: 8),
 			titleLabel.trailingAnchor.constraint(equalTo: tabView.trailingAnchor, constant: -8),
 			titleLabel.centerYAnchor.constraint(equalTo: tabView.centerYAnchor),
+
+			tabView.widthAnchor.constraint(equalToConstant: 200)
 		])
 
 		let tabClickGesture = NSClickGestureRecognizer(target: self, action: #selector(tabViewClicked(_:)))
@@ -120,27 +152,26 @@ class TabsViewController: NSStackView {
     }
 
 
-    func updateTabsVisibility() {
-        self.isHidden = tabs.count <= 1
-    }
+	func updateTabsVisibility() {
+		scrollView.isHidden = tabs.count <= 1
+	}
 
-    func animateTabAddition() {
-        NSAnimationContext.runAnimationGroup(
-            { context in
-                context.duration = 0.3
-                context.allowsImplicitAnimation = true
-                self.layoutSubtreeIfNeeded()
-            }, completionHandler: nil)
-    }
+	func animateTabAddition() {
+		NSAnimationContext.runAnimationGroup({ context in
+			context.duration = 0.3
+			context.allowsImplicitAnimation = true
+			stackView.layoutSubtreeIfNeeded()
+		}, completionHandler: nil)
+	}
 
 	func closeTab(at index: Int) {
 		guard index >= 0 && index < tabs.count else { return }
 
 		tabs.remove(at: index)
 		let tabView = tabViews.remove(at: index)
+		stackView.removeArrangedSubview(tabView)
 		tabView.removeFromSuperview()
 
-		// Select another tab if there are any left
 		if !tabs.isEmpty {
 			let newIndex = min(index, tabs.count - 1)
 			selectTab(at: newIndex)

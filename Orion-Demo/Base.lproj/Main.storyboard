@@ -723,7 +723,7 @@
                                 <toolbarItem implicitItemIdentifier="3ED87006-B1FC-4DED-A81E-3E253F41D087" label="URL Field" paletteLabel="URL Field" sizingBehavior="auto" id="PWi-Rb-xDD" userLabel="URL Field">
                                     <nil key="toolTip"/>
                                     <textField key="view" focusRingType="none" verticalHuggingPriority="750" id="Gdl-VG-7kt" customClass="URLTextController" customModule="Orion_Demo" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="14" width="96" height="35"/>
+                                        <rect key="frame" x="0.0" y="14" width="96" height="21"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <textFieldCell key="cell" controlSize="large" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" drawsBackground="YES" usesSingleLineMode="YES" id="6Qy-Xj-AMg" customClass="FaviconURLCell" customModule="Orion_Demo" customModuleProvider="target">
                                             <font key="font" metaFont="system"/>
@@ -732,12 +732,12 @@
                                         </textFieldCell>
                                     </textField>
                                 </toolbarItem>
-                                <toolbarItem implicitItemIdentifier="F253BA0A-73E5-46CD-BCE6-338A760D8833" label="Tabs Stack" paletteLabel="Tabs Stack" tag="-1" sizingBehavior="auto" id="5no-Ti-GqD" userLabel="Tabs Stack">
+                                <toolbarItem implicitItemIdentifier="25FBBAB2-232F-4A5A-88B2-B6D1AEA2D2BF" label="Tabs View" paletteLabel="Tabs View" tag="-1" sizingBehavior="auto" id="wvX-Mo-h1H">
                                     <nil key="toolTip"/>
-                                    <stackView key="view" distribution="fill" orientation="horizontal" alignment="top" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" id="Qt2-Bv-SgL" customClass="TabsViewController" customModule="Orion_Demo" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="14" width="200" height="110"/>
-                                        <autoresizingMask key="autoresizingMask"/>
-                                    </stackView>
+                                    <customView key="view" id="AFS-wO-E1w">
+                                        <rect key="frame" x="0.0" y="14" width="163" height="96"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    </customView>
                                 </toolbarItem>
                             </allowedToolbarItems>
                             <defaultToolbarItems>
@@ -745,7 +745,7 @@
                                 <toolbarItem reference="FDG-BI-fqc"/>
                                 <toolbarItem reference="PWi-Rb-xDD"/>
                                 <toolbarItem reference="FDG-BI-fqc"/>
-                                <toolbarItem reference="5no-Ti-GqD"/>
+                                <toolbarItem reference="wvX-Mo-h1H"/>
                                 <toolbarItem reference="QKY-j5-sG2"/>
                             </defaultToolbarItems>
                         </toolbar>
@@ -756,7 +756,7 @@
                     <connections>
                         <outlet property="addTabButton" destination="QKY-j5-sG2" id="R5R-ZD-pja"/>
                         <outlet property="backButton" destination="xql-ef-3ka" id="Xkx-3l-Eeq"/>
-                        <outlet property="tabsStack" destination="5no-Ti-GqD" id="peN-Th-3fI"/>
+                        <outlet property="tabsView" destination="wvX-Mo-h1H" id="jEe-Vk-W06"/>
                         <outlet property="toolbarView" destination="a22-TZ-tdg" id="M8B-92-5BT"/>
                         <outlet property="urlField" destination="PWi-Rb-xDD" id="xZL-aM-SSu"/>
                         <segue destination="XfG-lQ-9wD" kind="relationship" relationship="window.shadowedContentViewController" id="cq2-FE-JQM"/>

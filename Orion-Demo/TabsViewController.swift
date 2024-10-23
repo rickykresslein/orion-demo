@@ -3,9 +3,15 @@ import Cocoa
 class TabsViewController: NSView {
 	private var stackView: NSStackView!
 	private var scrollView: NSScrollView!
-    var tabs: [Tab] = []
-    var tabViews: [NSView] = []
-    var selectedTabIndex: Int = 0
+	var tabs: [Tab] = []
+	var tabViews: [NSView] = []
+	var selectedTabIndex: Int = 0
+
+	private let minimumTabWidth: CGFloat = 36 // Minimum width to show favicon
+	private let preferredTabWidth: CGFloat = 200 // Default/maximum tab width
+	private var tabWidthConstraints: [NSLayoutConstraint] = []
+	private var faviconConstraints: [(leading: NSLayoutConstraint, center: NSLayoutConstraint)] = []
+	private var titleLabels: [NSTextField] = []
 
 	override init(frame frameRect: NSRect) {
 		super.init(frame: frameRect)
@@ -44,6 +50,11 @@ class TabsViewController: NSView {
 			stackView.bottomAnchor.constraint(equalTo: scrollView.contentView.bottomAnchor),
 			stackView.heightAnchor.constraint(equalTo: scrollView.heightAnchor)
 		])
+
+		NotificationCenter.default.addObserver(self,
+		                                       selector: #selector(viewFrameDidChange),
+		                                       name: NSView.frameDidChangeNotification,
+		                                       object: self)
 	}
 
 	@discardableResult
@@ -55,13 +66,9 @@ class TabsViewController: NSView {
 		tabViews.append(tabView)
 		stackView.addArrangedSubview(tabView)
 
-		tabView.translatesAutoresizingMaskIntoConstraints = false
-		NSLayoutConstraint.activate([
-			tabView.widthAnchor.constraint(greaterThanOrEqualToConstant: 35) // Minimum width for tabs
-		])
-
 		selectTab(at: tabs.count - 1)
 		updateTabsVisibility()
+		updateTabWidths()
 		animateTabAddition()
 
 		return newTab
@@ -85,6 +92,12 @@ class TabsViewController: NSView {
 
 		faviconImageView.translatesAutoresizingMaskIntoConstraints = false
 		titleLabel.translatesAutoresizingMaskIntoConstraints = false
+		tabView.translatesAutoresizingMaskIntoConstraints = false
+
+		// Create both centered and leading constraints for favicon, depending on if text is hidden
+		let faviconLeadingConstraint = faviconImageView.leadingAnchor.constraint(equalTo: tabView.leadingAnchor, constant: 8)
+		let faviconCenterConstraint = faviconImageView.centerXAnchor.constraint(equalTo: tabView.centerXAnchor)
+		faviconCenterConstraint.isActive = false
 
 		NSLayoutConstraint.activate([
 			faviconImageView.leadingAnchor.constraint(equalTo: tabView.leadingAnchor, constant: 8),
@@ -94,10 +107,15 @@ class TabsViewController: NSView {
 
 			titleLabel.leadingAnchor.constraint(equalTo: faviconImageView.trailingAnchor, constant: 8),
 			titleLabel.trailingAnchor.constraint(equalTo: tabView.trailingAnchor, constant: -8),
-			titleLabel.centerYAnchor.constraint(equalTo: tabView.centerYAnchor),
-
-			tabView.widthAnchor.constraint(equalToConstant: 200)
+			titleLabel.centerYAnchor.constraint(equalTo: tabView.centerYAnchor)
 		])
+
+		faviconConstraints.append((leading: faviconLeadingConstraint, center: faviconCenterConstraint))
+		titleLabels.append(titleLabel)
+
+		let widthConstraint = tabView.widthAnchor.constraint(equalToConstant: preferredTabWidth)
+		widthConstraint.isActive = true
+		tabWidthConstraints.append(widthConstraint)
 
 		let tabClickGesture = NSClickGestureRecognizer(target: self, action: #selector(tabViewClicked(_:)))
 		tabView.addGestureRecognizer(tabClickGesture)
@@ -108,49 +126,86 @@ class TabsViewController: NSView {
 		return tabView
 	}
 
+	@objc private func viewFrameDidChange() {
+		updateTabWidths()
+	}
+
+	private func updateTabWidths() {
+		guard !tabs.isEmpty else {
+			return
+		}
+
+		let availableWidth = bounds.width
+		let tabCount = CGFloat(tabs.count)
+
+		var newTabWidth = min(preferredTabWidth, availableWidth / tabCount)
+		newTabWidth = max(newTabWidth, minimumTabWidth)
+		for constraint in tabWidthConstraints {
+			constraint.constant = newTabWidth
+		}
+
+		for i in 0..<tabViews.count {
+			let isCompressed = newTabWidth <= minimumTabWidth + 10
+			titleLabels[i].isHidden = isCompressed
+
+			// Toggle between centered and leading constraints
+			faviconConstraints[i].leading.isActive = !isCompressed
+			faviconConstraints[i].center.isActive = isCompressed
+		}
+
+		let totalWidth = newTabWidth * tabCount
+		stackView.frame.size.width = totalWidth
+	}
+
 	@objc func faviconClicked(_ gesture: NSClickGestureRecognizer) {
 		guard let clickedImageView = gesture.view,
-			  let tabView = clickedImageView.superview,
-			  let index = tabViews.firstIndex(of: tabView) else { return }
+		      let tabView = clickedImageView.superview,
+		      let index = tabViews.firstIndex(of: tabView)
+		else {
+			return
+		}
 
 		closeTab(at: index)
 	}
 
-    @objc func tabViewClicked(_ gesture: NSClickGestureRecognizer) {
-        guard let clickedView = gesture.view,
-            let index = tabViews.firstIndex(of: clickedView)
-        else { return }
-        selectTab(at: index)
-    }
+	@objc func tabViewClicked(_ gesture: NSClickGestureRecognizer) {
+		guard let clickedView = gesture.view,
+		      let index = tabViews.firstIndex(of: clickedView)
+		else {
+			return
+		}
+		selectTab(at: index)
+	}
 
-    func selectTab(at index: Int) {
-        guard index >= 0 && index < tabs.count else { return }
-        selectedTabIndex = index
-        updateTabAppearance()
+	func selectTab(at index: Int) {
+		guard index >= 0 && index < tabs.count else {
+			return
+		}
+		selectedTabIndex = index
+		updateTabAppearance()
 
-        if let mainWindowController = (NSApp.mainWindow?.windowController as? MainWindowController),
-            let contentViewController = mainWindowController.contentViewController
-                as? ViewController
-        {
-            contentViewController.setCurrentTab(tabs[index])
-        }
-    }
+		if let mainWindowController = (NSApp.mainWindow?.windowController as? MainWindowController),
+		   let contentViewController = mainWindowController.contentViewController
+		   as? ViewController
+		{
+			contentViewController.setCurrentTab(tabs[index])
+		}
+	}
 
-    func updateTabAppearance() {
-        for (index, tabView) in tabViews.enumerated() {
-            tabView.layer?.backgroundColor =
-                index == selectedTabIndex
-                ? NSColor.selectedControlColor.cgColor : NSColor.windowBackgroundColor.cgColor
+	func updateTabAppearance() {
+		for (index, tabView) in tabViews.enumerated() {
+			tabView.layer?.backgroundColor =
+				index == selectedTabIndex
+					? NSColor.selectedControlColor.cgColor : NSColor.windowBackgroundColor.cgColor
 
 			if let faviconImageView = tabView.subviews.first as? FaviconImageView,
-                let titleLabel = tabView.subviews.last as? NSTextField
-            {
+			   let titleLabel = tabView.subviews.last as? NSTextField
+			{
 				faviconImageView.updateFavicon(tabs[index].favicon ?? NSImage(systemSymbolName: "globe", accessibilityDescription: "Default favicon"))
-                titleLabel.stringValue = tabs[index].title
-            }
-        }
-    }
-
+				titleLabel.stringValue = tabs[index].title
+			}
+		}
+	}
 
 	func updateTabsVisibility() {
 		scrollView.isHidden = tabs.count <= 1
@@ -165,10 +220,19 @@ class TabsViewController: NSView {
 	}
 
 	func closeTab(at index: Int) {
-		guard index >= 0 && index < tabs.count else { return }
+		guard index >= 0 && index < tabs.count else {
+			return
+		}
 
 		tabs.remove(at: index)
 		let tabView = tabViews.remove(at: index)
+
+		if index < tabWidthConstraints.count {
+			tabWidthConstraints.remove(at: index)
+			faviconConstraints.remove(at: index)
+			titleLabels.remove(at: index)
+		}
+
 		stackView.removeArrangedSubview(tabView)
 		tabView.removeFromSuperview()
 
@@ -178,8 +242,8 @@ class TabsViewController: NSView {
 		}
 
 		updateTabsVisibility()
-		if let mainWindowController = (NSApp.mainWindow?.windowController as? MainWindowController)
-		{
+		updateTabWidths()
+		if let mainWindowController = (NSApp.mainWindow?.windowController as? MainWindowController) {
 			mainWindowController.updateUrlBarPosition()
 		}
 	}

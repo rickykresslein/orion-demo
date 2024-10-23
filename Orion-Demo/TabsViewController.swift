@@ -37,45 +37,81 @@ class TabsViewController: NSStackView {
         return newTab
     }
 
+	class CustomImageView: NSImageView {
+		override func updateTrackingAreas() {
+			super.updateTrackingAreas()
 
-    func createTabView(for tab: Tab) -> NSView {
-        let tabView = NSView()
-        tabView.wantsLayer = true
-        tabView.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+			// Remove existing tracking areas
+			for trackingArea in trackingAreas {
+				removeTrackingArea(trackingArea)
+			}
 
-        let faviconImageView = NSImageView()
-        faviconImageView.image =
-            tab.favicon
-            ?? NSImage(systemSymbolName: "globe", accessibilityDescription: "Default favicon")
-        faviconImageView.imageScaling = .scaleProportionallyDown
+			// Add new tracking area
+			let trackingArea = NSTrackingArea(
+				rect: bounds,
+				options: [.mouseEnteredAndExited, .activeAlways],
+				owner: self,
+				userInfo: nil
+			)
+			addTrackingArea(trackingArea)
+		}
 
-        let titleLabel = NSTextField(labelWithString: tab.title)
-        titleLabel.lineBreakMode = .byTruncatingTail
+		override func mouseEntered(with event: NSEvent) {
+			NSCursor.pointingHand.push()
+		}
 
-        tabView.addSubview(faviconImageView)
-        tabView.addSubview(titleLabel)
+		override func mouseExited(with event: NSEvent) {
+			NSCursor.pop()
+		}
+	}
 
-        faviconImageView.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        NSLayoutConstraint.activate([
-            faviconImageView.leadingAnchor.constraint(equalTo: tabView.leadingAnchor, constant: 8),
-            faviconImageView.centerYAnchor.constraint(equalTo: tabView.centerYAnchor),
-            faviconImageView.widthAnchor.constraint(equalToConstant: 16),
-            faviconImageView.heightAnchor.constraint(equalToConstant: 16),
+	func createTabView(for tab: Tab) -> NSView {
+		let tabView = NSView()
+		tabView.wantsLayer = true
+		tabView.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
 
-            titleLabel.leadingAnchor.constraint(
-                equalTo: faviconImageView.trailingAnchor, constant: 8),
-            titleLabel.trailingAnchor.constraint(equalTo: tabView.trailingAnchor, constant: -8),
-            titleLabel.centerYAnchor.constraint(equalTo: tabView.centerYAnchor),
-        ])
+		let faviconImageView = CustomImageView()
+		faviconImageView.image = tab.favicon ?? NSImage(systemSymbolName: "globe", accessibilityDescription: "Default favicon")
+		faviconImageView.imageScaling = .scaleProportionallyDown
+		faviconImageView.isEnabled = true
 
-        let clickGesture = NSClickGestureRecognizer(
-            target: self, action: #selector(tabViewClicked(_:)))
-        tabView.addGestureRecognizer(clickGesture)
+		let titleLabel = NSTextField(labelWithString: tab.title)
+		titleLabel.lineBreakMode = .byTruncatingTail
 
-        return tabView
-    }
+		tabView.addSubview(faviconImageView)
+		tabView.addSubview(titleLabel)
+
+		faviconImageView.translatesAutoresizingMaskIntoConstraints = false
+		titleLabel.translatesAutoresizingMaskIntoConstraints = false
+
+		NSLayoutConstraint.activate([
+			faviconImageView.leadingAnchor.constraint(equalTo: tabView.leadingAnchor, constant: 8),
+			faviconImageView.centerYAnchor.constraint(equalTo: tabView.centerYAnchor),
+			faviconImageView.widthAnchor.constraint(equalToConstant: 16),
+			faviconImageView.heightAnchor.constraint(equalToConstant: 16),
+
+			titleLabel.leadingAnchor.constraint(equalTo: faviconImageView.trailingAnchor, constant: 8),
+			titleLabel.trailingAnchor.constraint(equalTo: tabView.trailingAnchor, constant: -8),
+			titleLabel.centerYAnchor.constraint(equalTo: tabView.centerYAnchor),
+		])
+
+		let tabClickGesture = NSClickGestureRecognizer(target: self, action: #selector(tabViewClicked(_:)))
+		tabView.addGestureRecognizer(tabClickGesture)
+
+		let closeClickGesture = NSClickGestureRecognizer(target: self, action: #selector(faviconClicked(_:)))
+		faviconImageView.addGestureRecognizer(closeClickGesture)
+
+		return tabView
+	}
+
+	@objc func faviconClicked(_ gesture: NSClickGestureRecognizer) {
+		guard let clickedImageView = gesture.view,
+			  let tabView = clickedImageView.superview,
+			  let index = tabViews.firstIndex(of: tabView) else { return }
+
+		closeTab(at: index)
+	}
 
     @objc func tabViewClicked(_ gesture: NSClickGestureRecognizer) {
         guard let clickedView = gesture.view,
@@ -128,4 +164,20 @@ class TabsViewController: NSStackView {
                 self.layoutSubtreeIfNeeded()
             }, completionHandler: nil)
     }
+
+	func closeTab(at index: Int) {
+		guard index >= 0 && index < tabs.count else { return }
+
+		tabs.remove(at: index)
+		let tabView = tabViews.remove(at: index)
+		tabView.removeFromSuperview()
+
+		// Select another tab if there are any left
+		if !tabs.isEmpty {
+			let newIndex = min(index, tabs.count - 1)
+			selectTab(at: newIndex)
+		}
+
+		updateTabsVisibility()
+	}
 }

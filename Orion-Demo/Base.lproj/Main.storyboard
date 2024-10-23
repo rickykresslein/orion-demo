@@ -724,7 +724,7 @@
                                     <nil key="toolTip"/>
                                     <textField key="view" focusRingType="none" verticalHuggingPriority="750" id="Gdl-VG-7kt" customClass="URLTextController" customModule="Orion_Demo" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="14" width="96" height="35"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <autoresizingMask key="autoresizingMask"/>
                                         <textFieldCell key="cell" controlSize="large" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" drawsBackground="YES" usesSingleLineMode="YES" id="6Qy-Xj-AMg" customClass="FaviconURLCell" customModule="Orion_Demo" customModuleProvider="target">
                                             <font key="font" metaFont="system"/>
                                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -737,7 +737,6 @@
                                     <stackView key="view" distribution="fill" orientation="horizontal" alignment="top" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" id="Qt2-Bv-SgL" customClass="TabsViewController" customModule="Orion_Demo" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="14" width="200" height="110"/>
                                         <autoresizingMask key="autoresizingMask"/>
-                                        <nil name="visibilityPriorities"/>
                                     </stackView>
                                 </toolbarItem>
                             </allowedToolbarItems>

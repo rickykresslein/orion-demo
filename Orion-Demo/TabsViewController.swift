@@ -37,41 +37,12 @@ class TabsViewController: NSStackView {
         return newTab
     }
 
-	class CustomImageView: NSImageView {
-		override func updateTrackingAreas() {
-			super.updateTrackingAreas()
-
-			// Remove existing tracking areas
-			for trackingArea in trackingAreas {
-				removeTrackingArea(trackingArea)
-			}
-
-			// Add new tracking area
-			let trackingArea = NSTrackingArea(
-				rect: bounds,
-				options: [.mouseEnteredAndExited, .activeAlways],
-				owner: self,
-				userInfo: nil
-			)
-			addTrackingArea(trackingArea)
-		}
-
-		override func mouseEntered(with event: NSEvent) {
-			NSCursor.pointingHand.push()
-		}
-
-		override func mouseExited(with event: NSEvent) {
-			NSCursor.pop()
-		}
-	}
-
-
 	func createTabView(for tab: Tab) -> NSView {
 		let tabView = NSView()
 		tabView.wantsLayer = true
 		tabView.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
 
-		let faviconImageView = CustomImageView()
+		let faviconImageView = FaviconImageView()
 		faviconImageView.image = tab.favicon ?? NSImage(systemSymbolName: "globe", accessibilityDescription: "Default favicon")
 		faviconImageView.imageScaling = .scaleProportionallyDown
 		faviconImageView.isEnabled = true
@@ -139,13 +110,10 @@ class TabsViewController: NSStackView {
                 index == selectedTabIndex
                 ? NSColor.selectedControlColor.cgColor : NSColor.windowBackgroundColor.cgColor
 
-            if let faviconImageView = tabView.subviews.first as? NSImageView,
+			if let faviconImageView = tabView.subviews.first as? FaviconImageView,
                 let titleLabel = tabView.subviews.last as? NSTextField
             {
-                faviconImageView.image =
-                    tabs[index].favicon
-                    ?? NSImage(
-                        systemSymbolName: "globe", accessibilityDescription: "Default favicon")
+				faviconImageView.updateFavicon(tabs[index].favicon ?? NSImage(systemSymbolName: "globe", accessibilityDescription: "Default favicon"))
                 titleLabel.stringValue = tabs[index].title
             }
         }

@@ -9,6 +9,7 @@ class TabsViewController: NSView {
 
 	private let minimumTabWidth: CGFloat = 36 // Minimum width to show favicon
 	private let preferredTabWidth: CGFloat = 200 // Default/maximum tab width
+	private let tabVerticalPadding: CGFloat = 6
 	private var tabWidthConstraints: [NSLayoutConstraint] = []
 	private var faviconConstraints: [(leading: NSLayoutConstraint, center: NSLayoutConstraint)] = []
 	private var titleLabels: [NSTextField] = []
@@ -144,15 +145,15 @@ class TabsViewController: NSView {
 		NSLayoutConstraint.activate([
 			shadowContainer.leadingAnchor.constraint(equalTo: tabView.leadingAnchor, constant: 4),
 			shadowContainer.trailingAnchor.constraint(equalTo: tabView.trailingAnchor, constant: -4),
-			shadowContainer.topAnchor.constraint(equalTo: tabView.topAnchor, constant: 2),
-			shadowContainer.bottomAnchor.constraint(equalTo: tabView.bottomAnchor, constant: -2)
+			shadowContainer.topAnchor.constraint(equalTo: tabView.topAnchor, constant: tabVerticalPadding),
+			shadowContainer.bottomAnchor.constraint(equalTo: tabView.bottomAnchor, constant: -tabVerticalPadding)
 		])
 
 		NSLayoutConstraint.activate([
 			backgroundView.leadingAnchor.constraint(equalTo: tabView.leadingAnchor, constant: 4),
 			backgroundView.trailingAnchor.constraint(equalTo: tabView.trailingAnchor, constant: -4),
-			backgroundView.topAnchor.constraint(equalTo: tabView.topAnchor, constant: 2),
-			backgroundView.bottomAnchor.constraint(equalTo: tabView.bottomAnchor, constant: -2)
+			backgroundView.topAnchor.constraint(equalTo: tabView.topAnchor, constant: tabVerticalPadding),
+			backgroundView.bottomAnchor.constraint(equalTo: tabView.bottomAnchor, constant: -tabVerticalPadding)
 		])
 
 		// Create both centered and leading constraints for favicon, depending on if text is hidden

@@ -11,6 +11,9 @@ class MainWindowController: NSWindowController {
 	var urlTextField: URLTextField?
 	var tabsViewController: TabsViewController?
 
+	private let textFieldHeight: CGFloat = 30
+	private let tabsViewHeight: CGFloat = 42
+
 	override func windowDidLoad() {
 		super.windowDidLoad()
 
@@ -49,7 +52,7 @@ class MainWindowController: NSWindowController {
 		if let tabsViewController = tabsViewController {
 			NSLayoutConstraint.activate([
 				tabsViewController.widthAnchor.constraint(greaterThanOrEqualToConstant: 200),
-				tabsViewController.heightAnchor.constraint(equalToConstant: 28)
+				tabsViewController.heightAnchor.constraint(equalToConstant: tabsViewHeight)
 			])
 		}
 	}
@@ -95,7 +98,6 @@ class MainWindowController: NSWindowController {
 		urlField.view = urlTextField
 
 		// Size constraints
-		let textFieldHeight: CGFloat = 30
 		urlTextField?.translatesAutoresizingMaskIntoConstraints = false
 		NSLayoutConstraint.activate([
 			urlTextField!.heightAnchor.constraint(equalToConstant: textFieldHeight),

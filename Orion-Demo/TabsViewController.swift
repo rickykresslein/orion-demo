@@ -14,6 +14,8 @@ class TabsViewController: NSView {
 	private var faviconConstraints: [(leading: NSLayoutConstraint, center: NSLayoutConstraint)] = []
 	private var titleLabels: [NSTextField] = []
 	private var tabBackgroundViews: [NSVisualEffectView] = []
+	private var faviconToTitleConstraints: [NSLayoutConstraint] = []
+	private var titleToTrailingConstraints: [NSLayoutConstraint] = []
 
 	override init(frame frameRect: NSRect) {
 		super.init(frame: frameRect)
@@ -161,18 +163,23 @@ class TabsViewController: NSView {
 		let faviconCenterConstraint = faviconImageView.centerXAnchor.constraint(equalTo: tabView.centerXAnchor)
 		faviconCenterConstraint.isActive = false
 
+		let faviconToTitle = faviconImageView.trailingAnchor.constraint(equalTo: titleLabel.leadingAnchor, constant: -8)
+		let titleToTrailing = titleLabel.trailingAnchor.constraint(equalTo: tabView.trailingAnchor, constant: -8)
+
 		NSLayoutConstraint.activate([
-			faviconImageView.leadingAnchor.constraint(equalTo: tabView.leadingAnchor, constant: 8),
+			faviconLeadingConstraint,
 			faviconImageView.centerYAnchor.constraint(equalTo: tabView.centerYAnchor),
 			faviconImageView.widthAnchor.constraint(equalToConstant: 16),
 			faviconImageView.heightAnchor.constraint(equalToConstant: 16),
 
-			titleLabel.leadingAnchor.constraint(equalTo: faviconImageView.trailingAnchor, constant: 8),
-			titleLabel.trailingAnchor.constraint(equalTo: tabView.trailingAnchor, constant: -8),
-			titleLabel.centerYAnchor.constraint(equalTo: tabView.centerYAnchor)
+			titleLabel.centerYAnchor.constraint(equalTo: tabView.centerYAnchor),
+			faviconToTitle,
+			titleToTrailing
 		])
 
 		faviconConstraints.append((leading: faviconLeadingConstraint, center: faviconCenterConstraint))
+		faviconToTitleConstraints.append(faviconToTitle)
+		titleToTrailingConstraints.append(titleToTrailing)
 		titleLabels.append(titleLabel)
 		tabBackgroundViews.append(backgroundView)
 
@@ -194,26 +201,34 @@ class TabsViewController: NSView {
 	}
 
 	private func updateTabWidths() {
-		guard !tabs.isEmpty else {
-			return
-		}
+		guard !tabs.isEmpty else { return }
 
 		let availableWidth = bounds.width
 		let tabCount = CGFloat(tabs.count)
 
 		var newTabWidth = min(preferredTabWidth, availableWidth / tabCount)
 		newTabWidth = max(newTabWidth, minimumTabWidth)
-		for constraint in tabWidthConstraints {
-			constraint.constant = newTabWidth
-		}
 
-		for i in 0..<tabViews.count {
+		for (i, constraint) in tabWidthConstraints.enumerated() {
+			constraint.constant = newTabWidth
+
 			let isCompressed = newTabWidth <= minimumTabWidth + 10
 			titleLabels[i].isHidden = isCompressed
 
-			// Toggle between centered and leading constraints
-			faviconConstraints[i].leading.isActive = !isCompressed
-			faviconConstraints[i].center.isActive = isCompressed
+			faviconConstraints[i].leading.isActive = false
+			faviconConstraints[i].center.isActive = false
+			faviconToTitleConstraints[i].isActive = false
+			titleToTrailingConstraints[i].isActive = false
+
+			if isCompressed {
+				// Centered favicon only
+				faviconConstraints[i].center.isActive = true
+			} else {
+				// Leading favicon with title
+				faviconConstraints[i].leading.isActive = true
+				faviconToTitleConstraints[i].isActive = true
+				titleToTrailingConstraints[i].isActive = true
+			}
 		}
 
 		let totalWidth = newTabWidth * tabCount
@@ -297,6 +312,8 @@ class TabsViewController: NSView {
 		let tabView = tabViews.remove(at: index)
 		let widthConstraint = tabWidthConstraints.remove(at: index)
 		faviconConstraints.remove(at: index)
+		faviconToTitleConstraints.remove(at: index)
+		titleToTrailingConstraints.remove(at: index)
 		titleLabels.remove(at: index)
 		tabBackgroundViews.remove(at: index)
 

@@ -35,9 +35,9 @@ class TabsViewController: NSView {
 		scrollView.horizontalScrollElasticity = .none
 		scrollView.translatesAutoresizingMaskIntoConstraints = false
 
-		// Allow shadow outside of bounds
+		// Allow shadow outside of bounds but keep ScrollView in bounds
 		scrollView.contentView.wantsLayer = true
-		scrollView.contentView.layer?.masksToBounds = false
+		scrollView.contentView.layer?.masksToBounds = true
 		scrollView.drawsBackground = false
 
 		stackView = NSStackView()

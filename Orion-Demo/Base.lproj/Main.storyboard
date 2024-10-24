@@ -722,7 +722,7 @@
                                 </toolbarItem>
                                 <toolbarItem implicitItemIdentifier="3ED87006-B1FC-4DED-A81E-3E253F41D087" label="URL Field" paletteLabel="URL Field" sizingBehavior="auto" id="PWi-Rb-xDD" userLabel="URL Field">
                                     <nil key="toolTip"/>
-                                    <textField key="view" focusRingType="none" verticalHuggingPriority="750" id="Gdl-VG-7kt" customClass="URLTextController" customModule="Orion_Demo" customModuleProvider="target">
+                                    <textField key="view" verticalHuggingPriority="750" id="Gdl-VG-7kt" customClass="URLTextController" customModule="Orion_Demo" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="14" width="96" height="21"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <textFieldCell key="cell" controlSize="large" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" drawsBackground="YES" usesSingleLineMode="YES" id="6Qy-Xj-AMg" customClass="FaviconURLCell" customModule="Orion_Demo" customModuleProvider="target">
@@ -736,7 +736,7 @@
                                     <nil key="toolTip"/>
                                     <customView key="view" id="AFS-wO-E1w">
                                         <rect key="frame" x="0.0" y="14" width="163" height="96"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <autoresizingMask key="autoresizingMask"/>
                                     </customView>
                                 </toolbarItem>
                             </allowedToolbarItems>

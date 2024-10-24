@@ -16,6 +16,7 @@ class TabsViewController: NSView {
 	private var tabBackgroundViews: [NSVisualEffectView] = []
 	private var faviconToTitleConstraints: [NSLayoutConstraint] = []
 	private var titleToTrailingConstraints: [NSLayoutConstraint] = []
+	private var tabSeparators: [NSView] = []
 
 	override init(frame frameRect: NSRect) {
 		super.init(frame: frameRect)
@@ -121,8 +122,9 @@ class TabsViewController: NSView {
 		backgroundView.layer?.shouldRasterize = true
 		backgroundView.layer?.rasterizationScale = NSScreen.main?.backingScaleFactor ?? 2.0
 
-		tabView.addSubview(shadowContainer)
-		shadowContainer.addSubview(backgroundView)
+		let separatorView = NSView()
+		separatorView.wantsLayer = true
+		separatorView.layer?.backgroundColor = NSColor.separatorColor.withAlphaComponent(0.3).cgColor
 
 		let faviconImageView = FaviconImageView()
 		faviconImageView.image = tab.favicon ?? NSImage(systemSymbolName: "globe", accessibilityDescription: "Default favicon")
@@ -135,11 +137,15 @@ class TabsViewController: NSView {
 		titleLabel.isBezeled = false
 		titleLabel.isEditable = false
 
+		tabView.addSubview(shadowContainer)
+		shadowContainer.addSubview(backgroundView)
+		tabView.addSubview(separatorView)
 		tabView.addSubview(faviconImageView)
 		tabView.addSubview(titleLabel)
 
 		shadowContainer.translatesAutoresizingMaskIntoConstraints = false
 		backgroundView.translatesAutoresizingMaskIntoConstraints = false
+		separatorView.translatesAutoresizingMaskIntoConstraints = false
 		faviconImageView.translatesAutoresizingMaskIntoConstraints = false
 		titleLabel.translatesAutoresizingMaskIntoConstraints = false
 		tabView.translatesAutoresizingMaskIntoConstraints = false
@@ -148,14 +154,17 @@ class TabsViewController: NSView {
 			shadowContainer.leadingAnchor.constraint(equalTo: tabView.leadingAnchor, constant: 4),
 			shadowContainer.trailingAnchor.constraint(equalTo: tabView.trailingAnchor, constant: -4),
 			shadowContainer.topAnchor.constraint(equalTo: tabView.topAnchor, constant: tabVerticalPadding),
-			shadowContainer.bottomAnchor.constraint(equalTo: tabView.bottomAnchor, constant: -tabVerticalPadding)
-		])
+			shadowContainer.bottomAnchor.constraint(equalTo: tabView.bottomAnchor, constant: -tabVerticalPadding),
 
-		NSLayoutConstraint.activate([
 			backgroundView.leadingAnchor.constraint(equalTo: tabView.leadingAnchor, constant: 4),
 			backgroundView.trailingAnchor.constraint(equalTo: tabView.trailingAnchor, constant: -4),
 			backgroundView.topAnchor.constraint(equalTo: tabView.topAnchor, constant: tabVerticalPadding),
-			backgroundView.bottomAnchor.constraint(equalTo: tabView.bottomAnchor, constant: -tabVerticalPadding)
+			backgroundView.bottomAnchor.constraint(equalTo: tabView.bottomAnchor, constant: -tabVerticalPadding),
+
+			separatorView.trailingAnchor.constraint(equalTo: tabView.trailingAnchor),
+			separatorView.topAnchor.constraint(equalTo: tabView.topAnchor, constant: tabVerticalPadding + 4),
+			separatorView.bottomAnchor.constraint(equalTo: tabView.bottomAnchor, constant: -(tabVerticalPadding + 4)),
+			separatorView.widthAnchor.constraint(equalToConstant: 1)
 		])
 
 		// Create both centered and leading constraints for favicon, depending on if text is hidden
@@ -182,6 +191,7 @@ class TabsViewController: NSView {
 		titleToTrailingConstraints.append(titleToTrailing)
 		titleLabels.append(titleLabel)
 		tabBackgroundViews.append(backgroundView)
+		tabSeparators.append(separatorView)
 
 		let widthConstraint = tabView.widthAnchor.constraint(equalToConstant: preferredTabWidth)
 		widthConstraint.isActive = true
@@ -279,9 +289,17 @@ class TabsViewController: NSView {
 			}
 			tabBackgroundViews[index].isHidden = !isSelected
 
+			// Hide separator for selected tab, tab before selected tab, and last tab
+			if index < tabSeparators.count {
+				let hideSeperator = isSelected ||
+				index == tabViews.count - 1 ||
+				index + 1 == selectedTabIndex
+				tabSeparators[index].isHidden = hideSeperator
+			}
+
 			titleLabels[index].textColor = isSelected ? .labelColor : .secondaryLabelColor
 
-			if let faviconImageView = tabView.subviews[1] as? FaviconImageView,
+			if let faviconImageView = tabView.subviews[2] as? FaviconImageView,
 			   let titleLabel = tabView.subviews.last as? NSTextField
 			{
 				faviconImageView.updateFavicon(tabs[index].favicon ?? NSImage(systemSymbolName: "globe", accessibilityDescription: "Default favicon"))
@@ -316,6 +334,7 @@ class TabsViewController: NSView {
 		titleToTrailingConstraints.remove(at: index)
 		titleLabels.remove(at: index)
 		tabBackgroundViews.remove(at: index)
+		tabSeparators.remove(at: index)
 
 		stackView.removeArrangedSubview(tabView)
 		tabView.removeFromSuperview()

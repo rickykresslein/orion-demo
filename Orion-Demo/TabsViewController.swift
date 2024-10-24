@@ -282,6 +282,7 @@ class TabsViewController: NSView {
 		NSAnimationContext.runAnimationGroup({ context in
 			context.duration = 0.3
 			context.allowsImplicitAnimation = true
+			context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 			stackView.layoutSubtreeIfNeeded()
 		}, completionHandler: nil)
 	}
@@ -293,7 +294,7 @@ class TabsViewController: NSView {
 
 		tabs.remove(at: index)
 		let tabView = tabViews.remove(at: index)
-		tabWidthConstraints.remove(at: index)
+		let widthConstraint = tabWidthConstraints.remove(at: index)
 		faviconConstraints.remove(at: index)
 		titleLabels.remove(at: index)
 		tabBackgroundViews.remove(at: index)
@@ -306,14 +307,29 @@ class TabsViewController: NSView {
 				selectedTabIndex = max(0, selectedTabIndex - 1)
 			}
 			selectTab(at: selectedTabIndex)
+		} else {
+			selectedTabIndex = -1
 		}
 
-		updateTabsVisibility()
-		updateTabWidths()
-		updateTabAppearance()
+		NSAnimationContext.runAnimationGroup({ context in
+			context.duration = 0.3
+			context.allowsImplicitAnimation = true
+			context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 
-		if let mainWindowController = (NSApp.mainWindow?.windowController as? MainWindowController) {
-			mainWindowController.updateUrlBarPosition()
+			widthConstraint.constant = 0
+			tabView.alphaValue = 0
+
+			stackView.layoutSubtreeIfNeeded()
+
+		}) { [weak self] in
+			tabView.removeFromSuperview()
+			self?.updateTabsVisibility()
+			self?.updateTabWidths()
+			self?.updateTabAppearance()
+
+			if let mainWindowController = (NSApp.mainWindow?.windowController as? MainWindowController) {
+				mainWindowController.updateUrlBarPosition()
+			}
 		}
 	}
 }

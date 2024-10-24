@@ -12,6 +12,7 @@ class TabsViewController: NSView {
 	private var tabWidthConstraints: [NSLayoutConstraint] = []
 	private var faviconConstraints: [(leading: NSLayoutConstraint, center: NSLayoutConstraint)] = []
 	private var titleLabels: [NSTextField] = []
+	private var tabBackgroundViews: [NSVisualEffectView] = []
 
 	override init(frame frameRect: NSRect) {
 		super.init(frame: frameRect)
@@ -31,14 +32,27 @@ class TabsViewController: NSView {
 		scrollView.horizontalScrollElasticity = .none
 		scrollView.translatesAutoresizingMaskIntoConstraints = false
 
+		// Allow shadow outside of bounds
+		scrollView.contentView.wantsLayer = true
+		scrollView.contentView.layer?.masksToBounds = false
+		scrollView.drawsBackground = false
+
 		stackView = NSStackView()
 		stackView.orientation = .horizontal
 		stackView.distribution = .fillEqually
 		stackView.spacing = 2
 		stackView.translatesAutoresizingMaskIntoConstraints = false
 
+		// Allow shadow outside of bounds
+		stackView.wantsLayer = true
+		stackView.layer?.masksToBounds = false
+
 		scrollView.documentView = stackView
 		addSubview(scrollView)
+
+		// Allow shadow outside of bounds
+		wantsLayer = true
+		layer?.masksToBounds = false
 
 		NSLayoutConstraint.activate([
 			scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -77,7 +91,35 @@ class TabsViewController: NSView {
 	func createTabView(for tab: Tab) -> NSView {
 		let tabView = NSView()
 		tabView.wantsLayer = true
-		tabView.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+
+		// Create a shadow around active tab
+		let shadowContainer = NSView()
+		shadowContainer.wantsLayer = true
+		shadowContainer.layer?.shadowColor = NSColor.black.withAlphaComponent(0.6).cgColor
+		shadowContainer.layer?.shadowOffset = NSSize(width: 0, height: 0)
+		shadowContainer.layer?.shadowRadius = 5
+		shadowContainer.layer?.shadowOpacity = 0.2
+		shadowContainer.layer?.masksToBounds = false
+		// Rasterize to improve performance
+		shadowContainer.layer?.shouldRasterize = true
+		shadowContainer.layer?.rasterizationScale = NSScreen.main?.backingScaleFactor ?? 2.0
+
+		// Create background view for button effect
+		let backgroundView = NSVisualEffectView()
+		backgroundView.state = .active
+		backgroundView.material = .contentBackground // Maybe .contentBackground
+		backgroundView.blendingMode = .withinWindow
+		backgroundView.wantsLayer = true
+		backgroundView.layer?.cornerRadius = 4
+		backgroundView.layer?.cornerCurve = .continuous
+		backgroundView.isEmphasized = true
+		backgroundView.isHidden = true
+		// Rasterize to improve performance
+		backgroundView.layer?.shouldRasterize = true
+		backgroundView.layer?.rasterizationScale = NSScreen.main?.backingScaleFactor ?? 2.0
+
+		tabView.addSubview(shadowContainer)
+		shadowContainer.addSubview(backgroundView)
 
 		let faviconImageView = FaviconImageView()
 		faviconImageView.image = tab.favicon ?? NSImage(systemSymbolName: "globe", accessibilityDescription: "Default favicon")
@@ -86,13 +128,32 @@ class TabsViewController: NSView {
 
 		let titleLabel = NSTextField(labelWithString: tab.title)
 		titleLabel.lineBreakMode = .byTruncatingTail
+		titleLabel.drawsBackground = false
+		titleLabel.isBezeled = false
+		titleLabel.isEditable = false
 
 		tabView.addSubview(faviconImageView)
 		tabView.addSubview(titleLabel)
 
+		shadowContainer.translatesAutoresizingMaskIntoConstraints = false
+		backgroundView.translatesAutoresizingMaskIntoConstraints = false
 		faviconImageView.translatesAutoresizingMaskIntoConstraints = false
 		titleLabel.translatesAutoresizingMaskIntoConstraints = false
 		tabView.translatesAutoresizingMaskIntoConstraints = false
+
+		NSLayoutConstraint.activate([
+			shadowContainer.leadingAnchor.constraint(equalTo: tabView.leadingAnchor, constant: 4),
+			shadowContainer.trailingAnchor.constraint(equalTo: tabView.trailingAnchor, constant: -4),
+			shadowContainer.topAnchor.constraint(equalTo: tabView.topAnchor, constant: 2),
+			shadowContainer.bottomAnchor.constraint(equalTo: tabView.bottomAnchor, constant: -2)
+		])
+
+		NSLayoutConstraint.activate([
+			backgroundView.leadingAnchor.constraint(equalTo: tabView.leadingAnchor, constant: 4),
+			backgroundView.trailingAnchor.constraint(equalTo: tabView.trailingAnchor, constant: -4),
+			backgroundView.topAnchor.constraint(equalTo: tabView.topAnchor, constant: 2),
+			backgroundView.bottomAnchor.constraint(equalTo: tabView.bottomAnchor, constant: -2)
+		])
 
 		// Create both centered and leading constraints for favicon, depending on if text is hidden
 		let faviconLeadingConstraint = faviconImageView.leadingAnchor.constraint(equalTo: tabView.leadingAnchor, constant: 8)
@@ -112,6 +173,7 @@ class TabsViewController: NSView {
 
 		faviconConstraints.append((leading: faviconLeadingConstraint, center: faviconCenterConstraint))
 		titleLabels.append(titleLabel)
+		tabBackgroundViews.append(backgroundView)
 
 		let widthConstraint = tabView.widthAnchor.constraint(equalToConstant: preferredTabWidth)
 		widthConstraint.isActive = true
@@ -194,11 +256,16 @@ class TabsViewController: NSView {
 
 	func updateTabAppearance() {
 		for (index, tabView) in tabViews.enumerated() {
-			tabView.layer?.backgroundColor =
-				index == selectedTabIndex
-					? NSColor.selectedControlColor.cgColor : NSColor.windowBackgroundColor.cgColor
+			let isSelected = index == selectedTabIndex
 
-			if let faviconImageView = tabView.subviews.first as? FaviconImageView,
+			if let shadowContainer = tabBackgroundViews[index].superview {
+				shadowContainer.layer?.shadowOpacity = isSelected ? 0.3 : 0
+			}
+			tabBackgroundViews[index].isHidden = !isSelected
+
+			titleLabels[index].textColor = isSelected ? .labelColor : .secondaryLabelColor
+
+			if let faviconImageView = tabView.subviews[1] as? FaviconImageView,
 			   let titleLabel = tabView.subviews.last as? NSTextField
 			{
 				faviconImageView.updateFavicon(tabs[index].favicon ?? NSImage(systemSymbolName: "globe", accessibilityDescription: "Default favicon"))
@@ -226,23 +293,25 @@ class TabsViewController: NSView {
 
 		tabs.remove(at: index)
 		let tabView = tabViews.remove(at: index)
-
-		if index < tabWidthConstraints.count {
-			tabWidthConstraints.remove(at: index)
-			faviconConstraints.remove(at: index)
-			titleLabels.remove(at: index)
-		}
+		tabWidthConstraints.remove(at: index)
+		faviconConstraints.remove(at: index)
+		titleLabels.remove(at: index)
+		tabBackgroundViews.remove(at: index)
 
 		stackView.removeArrangedSubview(tabView)
 		tabView.removeFromSuperview()
 
 		if !tabs.isEmpty {
-			let newIndex = min(index, tabs.count - 1)
-			selectTab(at: newIndex)
+			if index <= selectedTabIndex {
+				selectedTabIndex = max(0, selectedTabIndex - 1)
+			}
+			selectTab(at: selectedTabIndex)
 		}
 
 		updateTabsVisibility()
 		updateTabWidths()
+		updateTabAppearance()
+
 		if let mainWindowController = (NSApp.mainWindow?.windowController as? MainWindowController) {
 			mainWindowController.updateUrlBarPosition()
 		}

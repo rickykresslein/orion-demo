@@ -8,7 +8,7 @@ class TabsViewController: NSView {
 	var selectedTabIndex: Int = 0
 
 	private let minimumTabWidth: CGFloat = 36 // Minimum width to show favicon
-	private let preferredTabWidth: CGFloat = 200 // Default/maximum tab width
+	private let preferredTabWidth: CGFloat = 150 // Default/maximum tab width
 	private let tabVerticalPadding: CGFloat = 6
 	private var tabWidthConstraints: [NSLayoutConstraint] = []
 	private var faviconConstraints: [(leading: NSLayoutConstraint, center: NSLayoutConstraint)] = []
@@ -112,7 +112,7 @@ class TabsViewController: NSView {
 		// Create background view for button effect
 		let backgroundView = NSVisualEffectView()
 		backgroundView.state = .active
-		backgroundView.material = .contentBackground // Maybe .contentBackground
+		backgroundView.material = .contentBackground
 		backgroundView.blendingMode = .withinWindow
 		backgroundView.wantsLayer = true
 		backgroundView.layer?.cornerRadius = 4
@@ -217,13 +217,28 @@ class TabsViewController: NSView {
 		let availableWidth = bounds.width
 		let tabCount = CGFloat(tabs.count)
 
-		var newTabWidth = min(preferredTabWidth, availableWidth / tabCount)
-		newTabWidth = max(newTabWidth, minimumTabWidth)
+		let selectedTabDesiredWidth = min(
+			calculateIdealTabWidth(for: selectedTabIndex),
+			preferredTabWidth
+		)
+
+		let remainingWidth = availableWidth - selectedTabDesiredWidth
+		let nonSelectedTabCount = tabCount - 1
+
+		var nonSelectedTabWidth = nonSelectedTabCount > 0 ? remainingWidth / nonSelectedTabCount : 0
+		nonSelectedTabWidth = min(nonSelectedTabWidth, preferredTabWidth)
+		nonSelectedTabWidth = max(nonSelectedTabWidth, minimumTabWidth)
+
+		var totalWidth: CGFloat = 0
 
 		for (i, constraint) in tabWidthConstraints.enumerated() {
-			constraint.constant = newTabWidth
+			let isSelected = i == selectedTabIndex
+			let newTabWidth = isSelected ? selectedTabDesiredWidth : nonSelectedTabWidth
 
-			let isCompressed = newTabWidth <= minimumTabWidth + 10
+			constraint.constant = newTabWidth
+			totalWidth += newTabWidth
+
+			let isCompressed = isSelected ? (newTabWidth < 60) : (newTabWidth <= minimumTabWidth + 10)
 			titleLabels[i].isHidden = isCompressed
 
 			faviconConstraints[i].leading.isActive = false
@@ -242,8 +257,25 @@ class TabsViewController: NSView {
 			}
 		}
 
-		let totalWidth = newTabWidth * tabCount
 		stackView.frame.size.width = totalWidth
+	}
+
+	private func calculateIdealTabWidth(for index: Int) -> CGFloat {
+		guard index >= 0 && index < titleLabels.count else { return minimumTabWidth }
+
+		let label = titleLabels[index]
+		let title = label.stringValue
+
+		// Create temporary string to measure text width
+		let attributedString = NSAttributedString(string: title, attributes: [
+			.font: label.font ?? NSFont.systemFont(ofSize: NSFont.systemFontSize)
+		])
+		let textWidth = attributedString.size().width
+
+		// Add padding for favicon and spacing
+		let totalWidth = textWidth + 45
+
+		return min(totalWidth, preferredTabWidth)
 	}
 
 	@objc func faviconClicked(_ gesture: NSClickGestureRecognizer) {
@@ -307,6 +339,8 @@ class TabsViewController: NSView {
 				titleLabel.stringValue = tabs[index].title
 			}
 		}
+
+		updateTabWidths()
 	}
 
 	func updateTabsVisibility() {

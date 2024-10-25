@@ -302,14 +302,82 @@ class TabsViewController: NSView {
 		guard index >= 0 && index < tabs.count else {
 			return
 		}
-		selectedTabIndex = index
-		updateTabAppearance()
 
-		if let mainWindowController = (NSApp.mainWindow?.windowController as? MainWindowController),
-		   let contentViewController = mainWindowController.contentViewController
-		   as? ViewController
-		{
-			contentViewController.setCurrentTab(tabs[index])
+		let oldIndex = selectedTabIndex
+		selectedTabIndex = index
+
+		NSAnimationContext.runAnimationGroup({ context in
+			context.duration = 0.2
+			context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+
+			// Grow or shrink old selected tab
+			if oldIndex >= 0 && oldIndex < tabWidthConstraints.count {
+				let oldTabWidth = calculateTabWidthForAnimation(for: oldIndex, isSelected: false)
+				tabWidthConstraints[oldIndex].animator().constant = oldTabWidth
+
+				// Update appearance for the old selected tab
+				if let shadowContainer = tabBackgroundViews[oldIndex].superview {
+					shadowContainer.layer?.shadowOpacity = 0
+				}
+				tabBackgroundViews[oldIndex].animator().isHidden = true
+				titleLabels[oldIndex].textColor = .secondaryLabelColor
+			}
+
+			// Grow or shrink new selected tab
+			let newTabWidth = calculateTabWidthForAnimation(for: index, isSelected: true)
+			tabWidthConstraints[index].animator().constant = newTabWidth
+
+			if let shadowContainer = tabBackgroundViews[index].superview {
+				shadowContainer.layer?.shadowOpacity = 0.3
+			}
+			tabBackgroundViews[index].animator().isHidden = false
+			titleLabels[index].textColor = .labelColor
+
+			for (i, constraint) in tabWidthConstraints.enumerated() {
+				if i != index && i != oldIndex {
+					let width = calculateTabWidthForAnimation(for: i, isSelected: false)
+					constraint.animator().constant = width
+				}
+			}
+
+			for (i, separator) in tabSeparators.enumerated() {
+				let hideSeperator = i == index || i == tabViews.count - 1 || i + 1 == index
+				separator.animator().isHidden = hideSeperator
+			}
+
+		}) { [weak self] in
+			self?.updateTabWidths()
+
+			if let mainWindowController = (NSApp.mainWindow?.windowController as? MainWindowController),
+			   let contentViewController = mainWindowController.contentViewController as? ViewController {
+				contentViewController.setCurrentTab(self?.tabs[index] ?? Tab(url: URL(string: "about:blank")!))
+			}
+		}
+	}
+
+	private func calculateTabWidthForAnimation(for index: Int, isSelected: Bool) -> CGFloat {
+		let availableWidth = bounds.width
+		let tabCount = CGFloat(tabs.count)
+
+		if isSelected {
+			let selectedTabDesiredWidth = min(
+				calculateIdealTabWidth(for: index),
+				preferredTabWidth
+			)
+			return selectedTabDesiredWidth
+		} else {
+			let selectedTabWidth = min(
+				calculateIdealTabWidth(for: selectedTabIndex),
+				preferredTabWidth
+			)
+			let remainingWidth = availableWidth - selectedTabWidth
+			let nonSelectedTabCount = tabCount - 1
+
+			var nonSelectedTabWidth = nonSelectedTabCount > 0 ? remainingWidth / nonSelectedTabCount : 0
+			nonSelectedTabWidth = min(nonSelectedTabWidth, preferredTabWidth)
+			nonSelectedTabWidth = max(nonSelectedTabWidth, minimumTabWidth)
+
+			return nonSelectedTabWidth
 		}
 	}
 

@@ -81,19 +81,22 @@ class MainWindowController: NSWindowController {
 	}
 
 	func updateUrlBarPosition() {
-		if tabsViewController?.tabs.count ?? 0 <= 1 {
-			// Center the URL bar
-			urlField.visibilityPriority = .high
-			toolbarView.centeredItemIdentifier = urlField.itemIdentifier
-		} else {
-			// Move URL bar to the left
-			urlField.visibilityPriority = .high
-			if let index = toolbarView.items.firstIndex(of: urlField) {
-				toolbarView.removeItem(at: index)
+		NSAnimationContext.runAnimationGroup({ context in
+			context.duration = 0.3
+			context.allowsImplicitAnimation = true
+
+			if tabsViewController?.tabs.count ?? 0 <= 1 {
+				// Center the URL bar
+				urlField.visibilityPriority = .high
+				toolbarView.centeredItemIdentifier = urlField.itemIdentifier
+			} else {
+				// Move URL bar to the left
+				urlField.visibilityPriority = .high
+				toolbarView.centeredItemIdentifier = nil
 			}
-			toolbarView.insertItem(withItemIdentifier: urlField.itemIdentifier, at: 2)
-			toolbarView.centeredItemIdentifier = nil
-		}
+
+			self.window?.layoutIfNeeded()
+		}, completionHandler: nil)
 	}
 
 	func setupUrlField() {

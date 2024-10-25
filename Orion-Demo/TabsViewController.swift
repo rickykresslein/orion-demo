@@ -27,7 +27,7 @@ class TabsViewController: NSView {
 		super.init(coder: coder)
 		setupViews()
 	}
-
+	
 	private func setupViews() {
 		scrollView = NSScrollView()
 		scrollView.hasHorizontalScroller = false

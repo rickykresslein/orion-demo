@@ -19,6 +19,7 @@ class MainWindowController: NSWindowController {
 
 		if let window = window {
 			let desiredSize = NSSize(width: 1512, height: 982)
+			window.minSize = NSSize(width: 450, height: 300)
 
 			let screenFrame = NSScreen.main?.visibleFrame ?? .zero
 			let origin = NSPoint(
@@ -42,6 +43,11 @@ class MainWindowController: NSWindowController {
 
 		addNewTab(self)
 		updateUrlBarPosition()
+
+		backButton.visibilityPriority = .low
+		urlField.visibilityPriority = .high
+		tabsView.visibilityPriority = .high
+		addTabButton.visibilityPriority = .low
 	}
 
 	func setupTabsViewController() {
@@ -51,7 +57,7 @@ class MainWindowController: NSWindowController {
 
 		if let tabsViewController = tabsViewController {
 			NSLayoutConstraint.activate([
-				tabsViewController.widthAnchor.constraint(greaterThanOrEqualToConstant: 200),
+				tabsViewController.widthAnchor.constraint(greaterThanOrEqualToConstant: 100),
 				tabsViewController.heightAnchor.constraint(equalToConstant: tabsViewHeight)
 			])
 		}

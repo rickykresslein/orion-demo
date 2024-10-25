@@ -66,7 +66,8 @@ class TabsViewController: NSView {
 
 			stackView.topAnchor.constraint(equalTo: scrollView.contentView.topAnchor),
 			stackView.bottomAnchor.constraint(equalTo: scrollView.contentView.bottomAnchor),
-			stackView.heightAnchor.constraint(equalTo: scrollView.heightAnchor)
+			stackView.heightAnchor.constraint(equalTo: scrollView.heightAnchor),
+			stackView.widthAnchor.constraint(greaterThanOrEqualToConstant: 100)
 		])
 
 		NotificationCenter.default.addObserver(self,

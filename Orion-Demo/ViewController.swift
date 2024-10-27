@@ -50,6 +50,8 @@ class ViewController: NSViewController, WKNavigationDelegate {
 	func loadWebPage(url: URL) {
 		let request = URLRequest(url: url)
 		if let currentTab = currentTab {
+			currentTab.favicon = NSImage(systemSymbolName: "globe", accessibilityDescription: "Default favicon")
+			mainWindowController?.tabsViewController?.updateTabAppearance()
 			currentTab.webView.load(request)
 		} else {
 			webView.load(request)

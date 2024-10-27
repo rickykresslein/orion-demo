@@ -22,6 +22,9 @@ class URLTextField: NSTextField {
 		self.isBordered = true
 		self.isBezeled = true
 		self.bezelStyle = .squareBezel
+		self.lineBreakMode = .byClipping
+		self.cell?.wraps = false
+		self.cell?.isScrollable = true
 		setupLockIcon()
 	}
 
@@ -54,17 +57,18 @@ class URLTextField: NSTextField {
 
 class URLTextFieldCell: NSTextFieldCell {
 	var iconWidth: CGFloat = 0
-
 	var mIsEditingOrSelecting:Bool = false
 
-	// Center text vertically
+	// Center text vertically and keep it from overflowing on the right
 	func adjustedFrame(toVerticallyCenterText rect: NSRect) -> NSRect {
+		let rightPadding: CGFloat = 4
 		var titleRect = super.titleRect(forBounds: rect)
 
 		let minimumHeight = self.cellSize(forBounds: rect).height + 5
 		titleRect.origin.y += (titleRect.height - minimumHeight) / 2
 		titleRect.size.height = minimumHeight
 		titleRect.origin.x += iconWidth
+		titleRect.size.width -= (iconWidth + rightPadding)
 
 		return titleRect
 	}

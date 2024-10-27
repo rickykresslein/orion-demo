@@ -48,16 +48,6 @@
 			path = "Orion-Demo";
 			sourceTree = "<group>";
 		};
-		9CB74A1A2CC525EE0014F958 /* Orion-DemoTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Orion-DemoTests";
-			sourceTree = "<group>";
-		};
-		9CB74A242CC525EE0014F958 /* Orion-DemoUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Orion-DemoUITests";
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,8 +79,6 @@
 			isa = PBXGroup;
 			children = (
 				9CB74A082CC525ED0014F958 /* Orion-Demo */,
-				9CB74A1A2CC525EE0014F958 /* Orion-DemoTests */,
-				9CB74A242CC525EE0014F958 /* Orion-DemoUITests */,
 				9CB74A072CC525ED0014F958 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -143,9 +131,6 @@
 			dependencies = (
 				9CB74A192CC525EE0014F958 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				9CB74A1A2CC525EE0014F958 /* Orion-DemoTests */,
-			);
 			name = "Orion-DemoTests";
 			packageProductDependencies = (
 			);
@@ -165,9 +150,6 @@
 			);
 			dependencies = (
 				9CB74A232CC525EE0014F958 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				9CB74A242CC525EE0014F958 /* Orion-DemoUITests */,
 			);
 			name = "Orion-DemoUITests";
 			packageProductDependencies = (

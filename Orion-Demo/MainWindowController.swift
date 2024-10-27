@@ -120,7 +120,7 @@ class MainWindowController: NSWindowController {
 
 	@objc func urlFieldChanged(_ sender: Any) {
 		if var urlString = urlTextField?.stringValue {
-			if !urlString.starts(with: "http://") && !urlString.starts(with: "https://") {
+			if !urlString.contains("://") {
 				urlString = "https://\(urlString)"
 				urlTextField?.stringValue = urlString
 			}

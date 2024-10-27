@@ -20,14 +20,33 @@ class TabsViewController: NSView {
 
 	override init(frame frameRect: NSRect) {
 		super.init(frame: frameRect)
+		setupNotifications()
 		setupViews()
 	}
 
 	required init?(coder: NSCoder) {
 		super.init(coder: coder)
+		setupNotifications()
 		setupViews()
 	}
-	
+
+	private func setupNotifications() {
+		NotificationCenter.default.addObserver(
+			self,
+			selector: #selector(handleTabTitleChange(_:)),
+			name: .tabTitleDidChange,
+			object: nil
+		)
+	}
+
+	@objc private func handleTabTitleChange(_ notification: Notification) {
+		updateTabAppearance()
+	}
+
+	deinit {
+		NotificationCenter.default.removeObserver(self)
+	}
+
 	private func setupViews() {
 		scrollView = NSScrollView()
 		scrollView.hasHorizontalScroller = false

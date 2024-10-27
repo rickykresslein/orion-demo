@@ -122,6 +122,7 @@ class MainWindowController: NSWindowController {
 		if var urlString = urlTextField?.stringValue {
 			if !urlString.starts(with: "http://") && !urlString.starts(with: "https://") {
 				urlString = "https://\(urlString)"
+				urlTextField?.stringValue = urlString
 			}
 			if let url = URL(string: urlString),
 			   let contentViewController = contentViewController as? ViewController {

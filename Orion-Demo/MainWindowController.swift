@@ -205,3 +205,50 @@ extension MainWindowController: NSTextFieldDelegate {
 		return false
 	}
 }
+
+// Implement keyboard shortcuts for closing and adding tabs
+extension MainWindowController {
+	override func responds(to aSelector: Selector!) -> Bool {
+		if aSelector == #selector(closeCurrentTab(_:)) {
+			return true
+		}
+		return super.responds(to: aSelector)
+	}
+
+	override func performKeyEquivalent(with event: NSEvent) -> Bool {
+		if event.type == .keyDown && event.modifierFlags.contains(.command) {
+			switch event.charactersIgnoringModifiers {
+			case "w":
+				if event.modifierFlags.contains(.shift) {
+					window?.close()
+				} else {
+					closeCurrentTab(nil)
+				}
+				return true
+			case "t":
+				newTab(nil)
+				return true
+			default:
+				break
+			}
+		}
+		return super.performKeyEquivalent(with: event)
+	}
+
+	@objc func closeCurrentTab(_ sender: Any?) {
+		// If only one tab exists (not showing tabs) close window
+		if tabsViewController?.tabs.count ?? 0 <= 1 {
+			window?.close()
+			return
+		}
+
+		// Otherwise close just the selected tab
+		if let index = tabsViewController?.selectedTabIndex {
+			tabsViewController?.closeTab(at: index)
+		}
+	}
+
+	@objc func newTab(_ sender: Any?) {
+		addNewTab(self)
+	}
+}

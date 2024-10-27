@@ -40,7 +40,7 @@ class URLTextField: NSTextField {
 		lockImageView.frame = NSRect(x: padding, y: padding, width: iconSize, height: iconSize)
 		if let cell = self.cell as? URLTextFieldCell {
 			cell.iconWidth = lockImageView.isHidden ? 0 : iconSize
-//			cell.alignment = .center
+			cell.alignment = .center
 			cell.usesSingleLineMode = true
 		}
 	}

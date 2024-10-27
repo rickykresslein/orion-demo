@@ -6,6 +6,7 @@ class ViewController: NSViewController, WKNavigationDelegate {
 	@IBOutlet var webView: WKWebView!
 	weak var mainWindowController: MainWindowController?
 	var currentTab: Tab?
+	private var observedWebViews: Set<WKWebView> = []
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -14,19 +15,31 @@ class ViewController: NSViewController, WKNavigationDelegate {
 		webView = WKWebView(frame: view.bounds, configuration: webConfiguration)
 		webView.autoresizingMask = [.width, .height]
 		webView.navigationDelegate = self
+		addTitleObserver(to: webView)
 		view.addSubview(webView)
 	}
 
-	func setCurrentTab(_ tab: Tab) {
-		currentTab = tab
+	override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+		if keyPath == "title" {
+			if let webView = object as? WKWebView {
+				currentTab?.title = webView.title ?? ""
+				mainWindowController?.tabsViewController?.updateTabAppearance()
+			}
+		}
+	}
 
+	func setCurrentTab(_ tab: Tab) {
 		if let oldWebView = view.subviews.first as? WKWebView {
+			removeTitleObserver(from: oldWebView)
 			oldWebView.removeFromSuperview()
 		}
+
+		currentTab = tab
 
 		tab.webView.frame = view.bounds
 		tab.webView.autoresizingMask = [.width, .height]
 		tab.webView.navigationDelegate = self
+		addTitleObserver(to: tab.webView)
 		view.addSubview(tab.webView)
 
 		if let url = tab.webView.url?.absoluteString {
@@ -54,8 +67,6 @@ class ViewController: NSViewController, WKNavigationDelegate {
 	func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
 		if let url = webView.url?.absoluteString {
 			mainWindowController?.updateUrlField(with: url)
-			currentTab?.title = webView.title ?? ""
-			mainWindowController?.tabsViewController?.updateTabAppearance()
 
 			// Get favicon
 			webView.evaluateJavaScript("var link = document.querySelector('link[rel~=\"icon\"]'); link ? link.href : '';") { (result, error) in
@@ -74,6 +85,11 @@ class ViewController: NSViewController, WKNavigationDelegate {
 		mainWindowController?.updateBackButtonState()
 	}
 
+	func webView(_ webView: WKWebView, didChangeTitle title: String?) {
+		currentTab?.title = title ?? ""
+		mainWindowController?.tabsViewController?.updateTabAppearance()
+	}
+
 	private func loadFavicon(from url: URL) {
 		URLSession.shared.dataTask(with: url) { (data, response, error) in
 			if let data = data, let image = NSImage(data: data) {
@@ -85,4 +101,24 @@ class ViewController: NSViewController, WKNavigationDelegate {
 		}.resume()
 	}
 
+	private func addTitleObserver(to webView: WKWebView) {
+		if !observedWebViews.contains(webView) {
+			webView.addObserver(self, forKeyPath: #keyPath(WKWebView.title), options: .new, context: nil)
+			observedWebViews.insert(webView)
+		}
+	}
+
+	private func removeTitleObserver(from webView: WKWebView) {
+		if observedWebViews.contains(webView) {
+			webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.title))
+			observedWebViews.remove(webView)
+		}
+	}
+
+	deinit {
+		for webView in observedWebViews {
+			webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.title))
+		}
+		observedWebViews.removeAll()
+	}
 }

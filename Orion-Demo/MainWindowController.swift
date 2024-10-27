@@ -128,6 +128,9 @@ class MainWindowController: NSWindowController {
 				contentViewController.loadWebPage(url: url)
 				contentViewController.currentTab?.url = url
 				tabsViewController?.updateTabAppearance()
+
+				// Deselect text field to make it clear URL is loading
+				window?.makeFirstResponder(nil)
 			}
 		}
 	}

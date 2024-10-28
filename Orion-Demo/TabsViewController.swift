@@ -66,7 +66,6 @@ class TabsViewController: NSView {
 		stackView.spacing = 2
 		stackView.translatesAutoresizingMaskIntoConstraints = false
 
-		// Allow shadow outside of bounds
 		stackView.wantsLayer = true
 		stackView.layer?.masksToBounds = false
 

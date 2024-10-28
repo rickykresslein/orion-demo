@@ -141,12 +141,6 @@ class MainWindowController: NSWindowController {
 		urlTextField?.updateLockIcon(for: urlString)
 	}
 
-	@objc func goBack(_ sender: Any) {
-		if let contentViewController = contentViewController as? ViewController {
-			contentViewController.webView?.goBack()
-		}
-	}
-
 	func setupBackButton() {
 		backButton.isEnabled = false
 		backButton.target = self
@@ -154,8 +148,18 @@ class MainWindowController: NSWindowController {
 	}
 
 	func updateBackButtonState() {
-		if let contentViewController = contentViewController as? ViewController {
-			backButton.isEnabled = contentViewController.webView?.canGoBack ?? false
+		if let contentViewController = contentViewController as? ViewController,
+		   let currentWebView = contentViewController.currentTab?.webView {
+			backButton.isEnabled = currentWebView.canGoBack
+		} else {
+			backButton.isEnabled = false
+		}
+	}
+
+	@objc func goBack(_ sender: Any) {
+		if let contentViewController = contentViewController as? ViewController,
+		   let currentWebView = contentViewController.currentTab?.webView {
+			currentWebView.goBack()
 		}
 	}
 }

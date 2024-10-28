@@ -7,6 +7,8 @@ class ViewController: NSViewController, WKNavigationDelegate {
 	weak var mainWindowController: MainWindowController?
 	var currentTab: Tab?
 
+	private var observingWebViews: Set<WKWebView> = []
+
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
@@ -15,6 +17,8 @@ class ViewController: NSViewController, WKNavigationDelegate {
 		webView.autoresizingMask = [.width, .height]
 		webView.navigationDelegate = self
 		view.addSubview(webView)
+
+		addWebViewObserver(webView)
 
 		NotificationCenter.default.addObserver(
 			self,
@@ -36,24 +40,35 @@ class ViewController: NSViewController, WKNavigationDelegate {
 				currentTab?.title = webView.title ?? ""
 				mainWindowController?.tabsViewController?.updateTabAppearance()
 			}
-		}
+		} else if keyPath == "canGoBack" {
+			DispatchQueue.main.async {
+				self.mainWindowController?.updateBackButtonState()
+			}
+        }
 	}
 
 	func setCurrentTab(_ tab: Tab) {
 		currentTab = tab
 
 		if let oldWebView = view.subviews.first as? WKWebView {
+			removeWebViewObserver(oldWebView)
 			oldWebView.removeFromSuperview()
 		}
+
+		currentTab = tab
 
 		tab.webView.frame = view.bounds
 		tab.webView.autoresizingMask = [.width, .height]
 		tab.webView.navigationDelegate = self
 		view.addSubview(tab.webView)
 
+		addWebViewObserver(tab.webView)
+
 		if let url = tab.webView.url?.absoluteString {
 			mainWindowController?.updateUrlField(with: url)
 		}
+
+		mainWindowController?.updateBackButtonState()
 	}
 
 	func loadWebPage(url: URL) {
@@ -113,7 +128,24 @@ class ViewController: NSViewController, WKNavigationDelegate {
 		}.resume()
 	}
 
+	private func addWebViewObserver(_ webView: WKWebView) {
+		if !observingWebViews.contains(webView) {
+			webView.addObserver(self, forKeyPath: #keyPath(WKWebView.canGoBack), options: .new, context: nil)
+			observingWebViews.insert(webView)
+		}
+	}
+
+	private func removeWebViewObserver(_ webView: WKWebView) {
+		if observingWebViews.contains(webView) {
+			webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.canGoBack))
+			observingWebViews.remove(webView)
+		}
+	}
+
 	deinit {
+		for webView in observingWebViews {
+			removeWebViewObserver(webView)
+		}
 		NotificationCenter.default.removeObserver(self)
 	}
 }

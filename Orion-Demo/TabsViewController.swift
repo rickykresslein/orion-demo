@@ -102,12 +102,33 @@ class TabsViewController: NSView {
 
 		let tabView = createTabView(for: newTab)
 		tabViews.append(tabView)
+
+		// Disable default animations
+		NSAnimationContext.beginGrouping()
+		NSAnimationContext.current.duration = 0
 		stackView.addArrangedSubview(tabView)
+		stackView.layout()
+		NSAnimationContext.endGrouping()
+
+		tabView.wantsLayer = true
+
+		let windowWidth = window?.frame.width ?? 1000
+		let extraWidth = windowWidth - 400
+
+		let translateAnimation = CABasicAnimation(keyPath: "transform.translation.x")
+		translateAnimation.fromValue = stackView.bounds.width + extraWidth
+		translateAnimation.toValue = 0
+		translateAnimation.duration = 0.3
+		translateAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+
+		tabView.layer?.transform = CATransform3DMakeTranslation(stackView.bounds.width + extraWidth, 0, 0)
 
 		selectTab(at: tabs.count - 1)
 		updateTabsVisibility()
 		updateTabWidths()
-		animateTabAddition()
+
+		tabView.layer?.transform = CATransform3DIdentity
+		tabView.layer?.add(translateAnimation, forKey: "slideIn")
 
 		return newTab
 	}

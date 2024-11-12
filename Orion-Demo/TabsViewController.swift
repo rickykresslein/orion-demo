@@ -13,7 +13,7 @@ class TabsViewController: NSView {
 	private var tabWidthConstraints: [NSLayoutConstraint] = []
 	private var faviconConstraints: [(leading: NSLayoutConstraint, center: NSLayoutConstraint)] = []
 	private var titleLabels: [NSTextField] = []
-	private var tabBackgroundViews: [NSVisualEffectView] = []
+	private var tabBackgroundViews: [TabBackgroundView] = []
 	private var faviconToTitleConstraints: [NSLayoutConstraint] = []
 	private var titleToTrailingConstraints: [NSLayoutConstraint] = []
 	private var tabSeparators: [NSView] = []
@@ -116,31 +116,10 @@ class TabsViewController: NSView {
 		let tabView = NSView()
 		tabView.wantsLayer = true
 
-		// Create a shadow around active tab
-		let shadowContainer = NSView()
-		shadowContainer.wantsLayer = true
-		shadowContainer.layer?.shadowColor = NSColor.black.withAlphaComponent(0.6).cgColor
-		shadowContainer.layer?.shadowOffset = NSSize(width: 0, height: 0)
-		shadowContainer.layer?.shadowRadius = 5
-		shadowContainer.layer?.shadowOpacity = 0.2
-		shadowContainer.layer?.masksToBounds = false
-		// Rasterize to improve performance
-		shadowContainer.layer?.shouldRasterize = true
-		shadowContainer.layer?.rasterizationScale = NSScreen.main?.backingScaleFactor ?? 2.0
-
-		// Create background view for button effect
-		let backgroundView = NSVisualEffectView()
-		backgroundView.state = .active
-		backgroundView.material = .contentBackground
-		backgroundView.blendingMode = .withinWindow
-		backgroundView.wantsLayer = true
-		backgroundView.layer?.cornerRadius = 4
-		backgroundView.layer?.cornerCurve = .continuous
-		backgroundView.isEmphasized = true
-		backgroundView.isHidden = true
-		// Rasterize to improve performance
-		backgroundView.layer?.shouldRasterize = true
-		backgroundView.layer?.rasterizationScale = NSScreen.main?.backingScaleFactor ?? 2.0
+		let backgroundView = TabBackgroundView()
+		backgroundView.translatesAutoresizingMaskIntoConstraints = false
+		backgroundView.isActiveTab = false
+		tabView.addSubview(backgroundView)
 
 		let separatorView = NSView()
 		separatorView.wantsLayer = true
@@ -157,13 +136,10 @@ class TabsViewController: NSView {
 		titleLabel.isBezeled = false
 		titleLabel.isEditable = false
 
-		tabView.addSubview(shadowContainer)
-		shadowContainer.addSubview(backgroundView)
 		tabView.addSubview(separatorView)
 		tabView.addSubview(faviconImageView)
 		tabView.addSubview(titleLabel)
 
-		shadowContainer.translatesAutoresizingMaskIntoConstraints = false
 		backgroundView.translatesAutoresizingMaskIntoConstraints = false
 		separatorView.translatesAutoresizingMaskIntoConstraints = false
 		faviconImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -171,11 +147,6 @@ class TabsViewController: NSView {
 		tabView.translatesAutoresizingMaskIntoConstraints = false
 
 		NSLayoutConstraint.activate([
-			shadowContainer.leadingAnchor.constraint(equalTo: tabView.leadingAnchor, constant: 4),
-			shadowContainer.trailingAnchor.constraint(equalTo: tabView.trailingAnchor, constant: -4),
-			shadowContainer.topAnchor.constraint(equalTo: tabView.topAnchor, constant: tabVerticalPadding),
-			shadowContainer.bottomAnchor.constraint(equalTo: tabView.bottomAnchor, constant: -tabVerticalPadding),
-
 			backgroundView.leadingAnchor.constraint(equalTo: tabView.leadingAnchor, constant: 4),
 			backgroundView.trailingAnchor.constraint(equalTo: tabView.trailingAnchor, constant: -4),
 			backgroundView.topAnchor.constraint(equalTo: tabView.topAnchor, constant: tabVerticalPadding),
@@ -339,9 +310,7 @@ class TabsViewController: NSView {
 
 				// Update appearance for the old selected tab
 				if oldIndex < tabBackgroundViews.count {
-					if let shadowContainer = tabBackgroundViews[oldIndex].superview {
-						shadowContainer.layer?.shadowOpacity = 0
-					}
+					tabBackgroundViews[oldIndex].isActiveTab = false
 					tabBackgroundViews[oldIndex].animator().isHidden = true
 					titleLabels[oldIndex].textColor = .secondaryLabelColor
 				}
@@ -355,9 +324,7 @@ class TabsViewController: NSView {
 			let newTabWidth = calculateTabWidthForAnimation(for: index, isSelected: true)
 			tabWidthConstraints[index].animator().constant = newTabWidth
 
-			if let shadowContainer = tabBackgroundViews[index].superview {
-				shadowContainer.layer?.shadowOpacity = 0.3
-			}
+			tabBackgroundViews[index].isActiveTab = true
 			tabBackgroundViews[index].animator().isHidden = false
 			titleLabels[index].textColor = .labelColor
 
@@ -416,25 +383,23 @@ class TabsViewController: NSView {
 	func updateTabAppearance() {
 		for (index, tabView) in tabViews.enumerated() {
 			let isSelected = index == selectedTabIndex
+			let backgroundView = tabBackgroundViews[index]
 
-			if let shadowContainer = tabBackgroundViews[index].superview {
-				shadowContainer.layer?.shadowOpacity = isSelected ? 0.3 : 0
-			}
-			tabBackgroundViews[index].isHidden = !isSelected
+			backgroundView.isActiveTab = isSelected
+			backgroundView.isHidden = !isSelected
 
 			// Hide separator for selected tab, tab before selected tab, and last tab
 			if index < tabSeparators.count {
 				let hideSeperator = isSelected ||
-					index == tabViews.count - 1 ||
-					index + 1 == selectedTabIndex
+				index == tabViews.count - 1 ||
+				index + 1 == selectedTabIndex
 				tabSeparators[index].isHidden = hideSeperator
 			}
 
 			titleLabels[index].textColor = isSelected ? .labelColor : .secondaryLabelColor
 
 			if let faviconImageView = tabView.subviews[2] as? FaviconImageView,
-			   let titleLabel = tabView.subviews.last as? NSTextField
-			{
+			   let titleLabel = tabView.subviews.last as? NSTextField {
 				faviconImageView.updateFavicon(tabs[index].favicon ?? NSImage(systemSymbolName: "globe", accessibilityDescription: "Default favicon"))
 				titleLabel.stringValue = tabs[index].title
 			}

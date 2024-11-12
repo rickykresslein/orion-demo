@@ -53,6 +53,7 @@ class TabsViewController: NSView {
 		scrollView.hasVerticalScroller = false
 		scrollView.autohidesScrollers = true
 		scrollView.horizontalScrollElasticity = .none
+		scrollView.verticalScrollElasticity = .none
 		scrollView.translatesAutoresizingMaskIntoConstraints = false
 
 		// Allow shadow outside of bounds but keep ScrollView in bounds

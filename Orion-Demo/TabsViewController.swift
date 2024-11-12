@@ -321,10 +321,9 @@ class TabsViewController: NSView {
 	}
 
 	func selectTab(at index: Int) {
-		guard index >= 0 && index < tabs.count else {
+		guard !tabs.isEmpty && index >= 0 && index < tabs.count else {
 			return
 		}
-
 		let oldIndex = selectedTabIndex
 		selectedTabIndex = index
 
@@ -338,11 +337,17 @@ class TabsViewController: NSView {
 				tabWidthConstraints[oldIndex].animator().constant = oldTabWidth
 
 				// Update appearance for the old selected tab
-				if let shadowContainer = tabBackgroundViews[oldIndex].superview {
-					shadowContainer.layer?.shadowOpacity = 0
+				if oldIndex < tabBackgroundViews.count {
+					if let shadowContainer = tabBackgroundViews[oldIndex].superview {
+						shadowContainer.layer?.shadowOpacity = 0
+					}
+					tabBackgroundViews[oldIndex].animator().isHidden = true
+					titleLabels[oldIndex].textColor = .secondaryLabelColor
 				}
-				tabBackgroundViews[oldIndex].animator().isHidden = true
-				titleLabels[oldIndex].textColor = .secondaryLabelColor
+			}
+
+			guard index < tabWidthConstraints.count && index < tabBackgroundViews.count else {
+				return
 			}
 
 			// Grow or shrink new selected tab
@@ -368,12 +373,15 @@ class TabsViewController: NSView {
 			}
 
 		}) { [weak self] in
-			self?.updateTabWidths()
+			guard let self = self else { return }
+			self.updateTabWidths()
 
 			if let mainWindowController = (NSApp.mainWindow?.windowController as? MainWindowController),
 			   let contentViewController = mainWindowController.contentViewController as? ViewController
 			{
-				contentViewController.setCurrentTab(self?.tabs[index] ?? Tab(url: URL(string: "about:blank")!))
+				if !self.tabs.isEmpty, self.tabs.indices.contains(index) {
+					contentViewController.setCurrentTab(self.tabs[index])
+				}
 			}
 		}
 	}
@@ -448,7 +456,13 @@ class TabsViewController: NSView {
 	}
 
 	func closeTab(at index: Int) {
-		guard index >= 0 && index < tabs.count else {
+		guard index >= 0 && index < tabs.count,
+			  index < tabViews.count,
+			  index < tabWidthConstraints.count,
+			  index < faviconConstraints.count,
+			  index < titleLabels.count,
+			  index < tabBackgroundViews.count,
+			  index < tabSeparators.count else {
 			return
 		}
 
@@ -472,6 +486,11 @@ class TabsViewController: NSView {
 			selectTab(at: selectedTabIndex)
 		} else {
 			selectedTabIndex = -1
+			// Handle the case when all tabs are closed
+			if let mainWindowController = (NSApp.mainWindow?.windowController as? MainWindowController) {
+				mainWindowController.updateUrlBarPosition()
+				mainWindowController.close()
+			}
 		}
 
 		NSAnimationContext.runAnimationGroup({ context in

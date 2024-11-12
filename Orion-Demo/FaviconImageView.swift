@@ -29,11 +29,11 @@ class FaviconImageView: NSImageView {
 
 	override func mouseEntered(with event: NSEvent) {
 		NSCursor.pointingHand.push()
-		self.image = closeIcon
+		image = closeIcon
 	}
 
 	override func mouseExited(with event: NSEvent) {
 		NSCursor.pop()
-		self.image = originalImage ?? NSImage(systemSymbolName: "globe", accessibilityDescription: "Default favicon")
+		image = originalImage ?? NSImage(systemSymbolName: "globe", accessibilityDescription: "Default favicon")
 	}
-	}
+}

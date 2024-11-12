@@ -5,7 +5,7 @@ class MainWindowController: NSWindowController {
 	@IBOutlet var toolbarView: NSToolbar!
 	@IBOutlet var backButton: NSToolbarItem!
 	@IBOutlet var urlField: NSToolbarItem!
-	@IBOutlet weak var tabsView: NSToolbarItem!
+	@IBOutlet var tabsView: NSToolbarItem!
 	@IBOutlet var addTabButton: NSToolbarItem!
 
 	var urlTextField: URLTextField?
@@ -125,7 +125,8 @@ class MainWindowController: NSWindowController {
 				urlTextField?.stringValue = urlString
 			}
 			if let url = URL(string: urlString),
-			   let contentViewController = contentViewController as? ViewController {
+			   let contentViewController = contentViewController as? ViewController
+			{
 				contentViewController.loadWebPage(url: url)
 				contentViewController.currentTab?.url = url
 				tabsViewController?.updateTabAppearance()
@@ -149,7 +150,8 @@ class MainWindowController: NSWindowController {
 
 	func updateBackButtonState() {
 		if let contentViewController = contentViewController as? ViewController,
-		   let currentWebView = contentViewController.currentTab?.webView {
+		   let currentWebView = contentViewController.currentTab?.webView
+		{
 			backButton.isEnabled = currentWebView.canGoBack
 		} else {
 			backButton.isEnabled = false
@@ -158,7 +160,8 @@ class MainWindowController: NSWindowController {
 
 	@objc func goBack(_ sender: Any) {
 		if let contentViewController = contentViewController as? ViewController,
-		   let currentWebView = contentViewController.currentTab?.webView {
+		   let currentWebView = contentViewController.currentTab?.webView
+		{
 			currentWebView.goBack()
 		}
 	}

@@ -2,7 +2,6 @@ import Cocoa
 import WebKit
 
 class ViewController: NSViewController, WKNavigationDelegate {
-
 	@IBOutlet var webView: WKWebView!
 	weak var mainWindowController: MainWindowController?
 	var currentTab: Tab?
@@ -34,7 +33,7 @@ class ViewController: NSViewController, WKNavigationDelegate {
 		}
 	}
 
-	override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+	override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
 		if keyPath == "title" {
 			if let webView = object as? WKWebView {
 				currentTab?.title = webView.title ?? ""
@@ -44,7 +43,7 @@ class ViewController: NSViewController, WKNavigationDelegate {
 			DispatchQueue.main.async {
 				self.mainWindowController?.updateBackButtonState()
 			}
-        }
+		}
 	}
 
 	func setCurrentTab(_ tab: Tab) {
@@ -99,9 +98,10 @@ class ViewController: NSViewController, WKNavigationDelegate {
 			}
 
 			// Load favicon regardless of whether this is the current tab
-			webView.evaluateJavaScript("var link = document.querySelector('link[rel~=\"icon\"]'); link ? link.href : '';") { [weak self] (result, error) in
+			webView.evaluateJavaScript("var link = document.querySelector('link[rel~=\"icon\"]'); link ? link.href : '';") { [weak self] result, _ in
 				if let faviconURLString = result as? String,
-				   let faviconURL = URL(string: faviconURLString) {
+				   let faviconURL = URL(string: faviconURLString)
+				{
 					self?.loadFavicon(from: faviconURL, for: webView)
 				} else if let defaultFaviconURL = URL(string: "\(webView.url?.scheme ?? "https")://\(webView.url?.host ?? "")/favicon.ico") {
 					self?.loadFavicon(from: defaultFaviconURL, for: webView)
@@ -116,10 +116,11 @@ class ViewController: NSViewController, WKNavigationDelegate {
 	}
 
 	private func loadFavicon(from url: URL, for webView: WKWebView) {
-		URLSession.shared.dataTask(with: url) { [weak self] (data, response, error) in
+		URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
 			if let data = data,
 			   let image = NSImage(data: data),
-			   let tab = self?.mainWindowController?.tabsViewController?.tabs.first(where: { $0.webView == webView }) {
+			   let tab = self?.mainWindowController?.tabsViewController?.tabs.first(where: { $0.webView == webView })
+			{
 				DispatchQueue.main.async {
 					tab.favicon = image
 					self?.mainWindowController?.tabsViewController?.updateTabAppearance()

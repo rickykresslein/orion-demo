@@ -230,7 +230,9 @@ class TabsViewController: NSView {
 	}
 
 	private func updateTabWidths() {
-		guard !tabs.isEmpty else { return }
+		guard !tabs.isEmpty else {
+			return
+		}
 
 		let availableWidth = bounds.width
 		let tabCount = CGFloat(tabs.count)
@@ -279,7 +281,9 @@ class TabsViewController: NSView {
 	}
 
 	private func calculateIdealTabWidth(for index: Int) -> CGFloat {
-		guard index >= 0 && index < titleLabels.count else { return minimumTabWidth }
+		guard index >= 0 && index < titleLabels.count else {
+			return minimumTabWidth
+		}
 
 		let label = titleLabels[index]
 		let title = label.stringValue
@@ -367,7 +371,8 @@ class TabsViewController: NSView {
 			self?.updateTabWidths()
 
 			if let mainWindowController = (NSApp.mainWindow?.windowController as? MainWindowController),
-			   let contentViewController = mainWindowController.contentViewController as? ViewController {
+			   let contentViewController = mainWindowController.contentViewController as? ViewController
+			{
 				contentViewController.setCurrentTab(self?.tabs[index] ?? Tab(url: URL(string: "about:blank")!))
 			}
 		}
@@ -411,8 +416,8 @@ class TabsViewController: NSView {
 			// Hide separator for selected tab, tab before selected tab, and last tab
 			if index < tabSeparators.count {
 				let hideSeperator = isSelected ||
-				index == tabViews.count - 1 ||
-				index + 1 == selectedTabIndex
+					index == tabViews.count - 1 ||
+					index + 1 == selectedTabIndex
 				tabSeparators[index].isHidden = hideSeperator
 			}
 

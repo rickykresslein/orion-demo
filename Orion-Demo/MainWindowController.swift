@@ -19,7 +19,7 @@ class MainWindowController: NSWindowController {
 
 		if let window = window {
 			let desiredSize = NSSize(width: 1512, height: 982)
-			window.minSize = NSSize(width: 450, height: 300)
+			window.minSize = NSSize(width: 512, height: 300)
 
 			let screenFrame = NSScreen.main?.visibleFrame ?? .zero
 			let origin = NSPoint(

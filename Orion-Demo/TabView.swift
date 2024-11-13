@@ -51,8 +51,9 @@ class TabView: NSView {
 		if let window = window {
 			let mouseLocation = window.mouseLocationOutsideOfEventStream
 			let convertedPoint = convert(mouseLocation, from: nil)
-			if bounds.contains(convertedPoint) {
-				isHovered = true
+			let shouldBeHovered = bounds.contains(convertedPoint)
+			if isHovered != shouldBeHovered {
+				isHovered = shouldBeHovered
 			}
 		}
 	}
@@ -65,5 +66,17 @@ class TabView: NSView {
 	override func mouseExited(with event: NSEvent) {
 		super.mouseExited(with: event)
 		isHovered = false
+	}
+
+	// Manual check to eliminate leftover highlights
+	func checkHoverState() {
+		if let window = window {
+			let mouseLocation = window.mouseLocationOutsideOfEventStream
+			let convertedPoint = convert(mouseLocation, from: nil)
+			let shouldBeHovered = bounds.contains(convertedPoint)
+			if isHovered != shouldBeHovered {
+				isHovered = shouldBeHovered
+			}
+		}
 	}
 }

@@ -3,6 +3,7 @@ import Cocoa
 class TabsViewController: NSView {
 	private var stackView: NSStackView!
 	private var scrollView: NSScrollView!
+	private var hoverCheckTimer: Timer?
 	var tabs: [Tab] = []
 	var tabViews: [NSView] = []
 	var selectedTabIndex: Int = 0
@@ -22,12 +23,14 @@ class TabsViewController: NSView {
 		super.init(frame: frameRect)
 		setupNotifications()
 		setupViews()
+		setupHoverCheck()
 	}
 
 	required init?(coder: NSCoder) {
 		super.init(coder: coder)
 		setupNotifications()
 		setupViews()
+		setupHoverCheck()
 	}
 
 	private func setupNotifications() {
@@ -39,12 +42,27 @@ class TabsViewController: NSView {
 		)
 	}
 
+	private func setupHoverCheck() {
+		hoverCheckTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+			self?.checkAllTabHoverStates()
+		}
+	}
+
+	private func checkAllTabHoverStates() {
+		for tabView in tabViews {
+			if let tab = tabView as? TabView {
+				tab.checkHoverState()
+			}
+		}
+	}
+
 	@objc private func handleTabTitleChange(_ notification: Notification) {
 		updateTabAppearance()
 	}
 
 	deinit {
 		NotificationCenter.default.removeObserver(self)
+		hoverCheckTimer?.invalidate()
 	}
 
 	private func setupViews() {

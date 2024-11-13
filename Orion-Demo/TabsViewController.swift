@@ -84,7 +84,7 @@ class TabsViewController: NSView {
 		stackView.distribution = .fillEqually
 		stackView.spacing = 2
 		stackView.translatesAutoresizingMaskIntoConstraints = false
-		stackView.edgeInsets = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
+		stackView.edgeInsets = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
 
 		stackView.wantsLayer = true
 		stackView.layer?.masksToBounds = false
@@ -104,6 +104,7 @@ class TabsViewController: NSView {
 
 			stackView.topAnchor.constraint(equalTo: scrollView.contentView.topAnchor),
 			stackView.bottomAnchor.constraint(equalTo: scrollView.contentView.bottomAnchor),
+			stackView.leadingAnchor.constraint(equalTo: scrollView.contentView.leadingAnchor),
 			stackView.heightAnchor.constraint(equalTo: scrollView.heightAnchor),
 			stackView.widthAnchor.constraint(greaterThanOrEqualToConstant: 100)
 		])
@@ -250,7 +251,7 @@ class TabsViewController: NSView {
 	private func updateTabWidths() {
 		guard !tabs.isEmpty else { return }
 
-		let availableWidth = bounds.width - 10
+		let availableWidth = bounds.width - 16
 		let tabCount = CGFloat(tabs.count)
 		let spacingWidth = stackView.spacing * (tabCount - 1)
 		let effectiveAvailableWidth = availableWidth - spacingWidth

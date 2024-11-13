@@ -56,7 +56,7 @@ class TabBackgroundView: NSView {
 			layer?.shadowOpacity = 0.3
 		} else if isHovered {
 			visualEffectView.isHidden = false
-			visualEffectView.material = .menu
+			visualEffectView.material = .headerView
 			visualEffectView.layer?.backgroundColor = NSColor.gray.cgColor
 			layer?.shadowOpacity = 0
 		} else {

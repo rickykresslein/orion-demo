@@ -5,8 +5,13 @@ class TabBackgroundView: NSView {
 
 	var isActiveTab: Bool = false {
 		didSet {
-			visualEffectView.isHidden = !isActiveTab
-			updateShadow()
+			updateAppearance()
+		}
+	}
+
+	var isHovered: Bool = false {
+		didSet {
+			updateAppearance()
 		}
 	}
 
@@ -43,8 +48,22 @@ class TabBackgroundView: NSView {
 		layer?.masksToBounds = false
 	}
 
-	private func updateShadow() {
-		layer?.shadowOpacity = isActiveTab ? 0.3 : 0
+	private func updateAppearance() {
+		if isActiveTab {
+			visualEffectView.isHidden = false
+			visualEffectView.material = .contentBackground
+			visualEffectView.layer?.backgroundColor = nil
+			layer?.shadowOpacity = 0.3
+		} else if isHovered {
+			visualEffectView.isHidden = false
+			visualEffectView.material = .menu
+			visualEffectView.layer?.backgroundColor = NSColor.gray.cgColor
+			layer?.shadowOpacity = 0
+		} else {
+			visualEffectView.isHidden = true
+			visualEffectView.layer?.backgroundColor = nil
+			layer?.shadowOpacity = 0
+		}
 	}
 
 	required init?(coder: NSCoder) {
@@ -54,6 +73,6 @@ class TabBackgroundView: NSView {
 	override func viewDidChangeEffectiveAppearance() {
 		super.viewDidChangeEffectiveAppearance()
 		setupShadow()
-		updateShadow()
+		updateAppearance()
 	}
 }

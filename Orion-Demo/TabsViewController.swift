@@ -134,7 +134,7 @@ class TabsViewController: NSView {
 	}
 
 	func createTabView(for tab: Tab) -> NSView {
-		let tabView = NSView()
+		let tabView = TabView()
 		tabView.wantsLayer = true
 
 		let backgroundView = TabBackgroundView()
@@ -178,6 +178,11 @@ class TabsViewController: NSView {
 			separatorView.bottomAnchor.constraint(equalTo: tabView.bottomAnchor, constant: -(tabVerticalPadding + 4)),
 			separatorView.widthAnchor.constraint(equalToConstant: 1)
 		])
+
+		tabView.onHoverStateChanged = { [weak backgroundView] isHovered in
+			backgroundView?.isHidden = false
+			backgroundView?.isHovered = isHovered
+		}
 
 		// Create both centered and leading constraints for favicon, depending on if text is hidden
 		let faviconLeadingConstraint = faviconImageView.leadingAnchor.constraint(equalTo: tabView.leadingAnchor, constant: 8)

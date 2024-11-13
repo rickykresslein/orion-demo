@@ -168,8 +168,8 @@ class TabsViewController: NSView {
 		tabView.translatesAutoresizingMaskIntoConstraints = false
 
 		NSLayoutConstraint.activate([
-			backgroundView.leadingAnchor.constraint(equalTo: tabView.leadingAnchor, constant: 4),
-			backgroundView.trailingAnchor.constraint(equalTo: tabView.trailingAnchor, constant: -4),
+			backgroundView.leadingAnchor.constraint(equalTo: tabView.leadingAnchor),
+			backgroundView.trailingAnchor.constraint(equalTo: tabView.trailingAnchor),
 			backgroundView.topAnchor.constraint(equalTo: tabView.topAnchor, constant: tabVerticalPadding),
 			backgroundView.bottomAnchor.constraint(equalTo: tabView.bottomAnchor, constant: -tabVerticalPadding),
 

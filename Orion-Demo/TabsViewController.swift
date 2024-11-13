@@ -414,7 +414,11 @@ class TabsViewController: NSView {
 			let isHovered = (tabView as? TabView)?.isHovered ?? false
 
 			backgroundView.isActiveTab = isSelected
-			backgroundView.isHidden = !isSelected && !isHovered
+
+			// Wait for fade-out animation to complete before updating appearance
+			DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+				backgroundView.isHidden = !isSelected && !isHovered
+			}
 
 			if index < tabSeparators.count {
 				// Hide separators in these cases

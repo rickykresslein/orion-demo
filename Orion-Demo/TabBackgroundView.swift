@@ -55,14 +55,31 @@ class TabBackgroundView: NSView {
 			visualEffectView.layer?.backgroundColor = nil
 			layer?.shadowOpacity = 0.3
 		} else if isHovered {
-			visualEffectView.isHidden = false
-			visualEffectView.material = .headerView
-			visualEffectView.layer?.backgroundColor = NSColor.gray.cgColor
-			layer?.shadowOpacity = 0
+			NSAnimationContext.runAnimationGroup({ context in
+				context.duration = 0.3
+				visualEffectView.animator().isHidden = false
+				visualEffectView.material = .headerView
+				visualEffectView.animator().alphaValue = 0.0
+				visualEffectView.animator().alphaValue = 1.0
+				visualEffectView.layer?.backgroundColor = NSColor.gray.cgColor
+				layer?.shadowOpacity = 0
+			})
 		} else {
-			visualEffectView.isHidden = true
-			visualEffectView.layer?.backgroundColor = nil
-			layer?.shadowOpacity = 0
+			if visualEffectView.material == .headerView {
+				NSAnimationContext.runAnimationGroup({ context in
+					context.duration = 0.3
+					visualEffectView.material = .windowBackground
+					visualEffectView.animator().alphaValue = 0.0
+					visualEffectView.animator().alphaValue = 1.0
+					visualEffectView.layer?.backgroundColor = nil
+					visualEffectView.animator().isHidden = true
+					layer?.shadowOpacity = 0
+				})
+			} else {
+				visualEffectView.isHidden = true
+				visualEffectView.layer?.backgroundColor = nil
+				layer?.shadowOpacity = 0
+			}
 		}
 	}
 

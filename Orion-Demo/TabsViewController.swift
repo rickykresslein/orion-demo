@@ -84,6 +84,7 @@ class TabsViewController: NSView {
 		stackView.distribution = .fillEqually
 		stackView.spacing = 2
 		stackView.translatesAutoresizingMaskIntoConstraints = false
+		stackView.edgeInsets = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
 
 		stackView.wantsLayer = true
 		stackView.layer?.masksToBounds = false

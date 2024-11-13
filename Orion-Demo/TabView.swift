@@ -34,7 +34,8 @@ class TabView: NSView {
 		let options: NSTrackingArea.Options = [
 			.mouseEnteredAndExited,
 			.activeAlways,
-			.inVisibleRect
+			.inVisibleRect,
+			.cursorUpdate
 		]
 
 		trackingArea = NSTrackingArea(
@@ -61,11 +62,17 @@ class TabView: NSView {
 	override func mouseEntered(with event: NSEvent) {
 		super.mouseEntered(with: event)
 		isHovered = true
+		NSCursor.pointingHand.set()
 	}
 
 	override func mouseExited(with event: NSEvent) {
 		super.mouseExited(with: event)
 		isHovered = false
+		NSCursor.arrow.set()
+	}
+
+	override func cursorUpdate(with event: NSEvent) {
+		NSCursor.pointingHand.set()
 	}
 
 	// Manual check to eliminate leftover highlights
@@ -76,6 +83,11 @@ class TabView: NSView {
 			let shouldBeHovered = bounds.contains(convertedPoint)
 			if isHovered != shouldBeHovered {
 				isHovered = shouldBeHovered
+				if shouldBeHovered {
+					NSCursor.pointingHand.set()
+				} else {
+					NSCursor.arrow.set()
+				}
 			}
 		}
 	}

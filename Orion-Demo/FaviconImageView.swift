@@ -61,7 +61,6 @@ class FaviconImageView: NSImageView {
 		if NSEvent.mouseInView(self) {
 			isMouseInside = true
 			image = closeIcon
-			NSCursor.pointingHand.push()
 		} else {
 			resetToOriginalState()
 		}
@@ -69,9 +68,6 @@ class FaviconImageView: NSImageView {
 
 	private func resetToOriginalState() {
 		isMouseInside = false
-		if NSCursor.current == NSCursor.pointingHand {
-			NSCursor.pop()
-		}
 		image = originalImage ?? NSImage(systemSymbolName: "globe", accessibilityDescription: "Default favicon")
 	}
 
@@ -114,7 +110,6 @@ class FaviconImageView: NSImageView {
 
 	override func mouseEntered(with event: NSEvent) {
 		isMouseInside = true
-		NSCursor.pointingHand.push()
 		image = closeIcon
 	}
 

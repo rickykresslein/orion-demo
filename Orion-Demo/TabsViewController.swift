@@ -179,9 +179,10 @@ class TabsViewController: NSView {
 			separatorView.widthAnchor.constraint(equalToConstant: 1)
 		])
 
-		tabView.onHoverStateChanged = { [weak backgroundView] isHovered in
+		tabView.onHoverStateChanged = { [weak self, weak backgroundView] isHovered in
 			backgroundView?.isHidden = false
 			backgroundView?.isHovered = isHovered
+			self?.updateTabAppearance()
 		}
 
 		// Create both centered and leading constraints for favicon, depending on if text is hidden
@@ -410,16 +411,24 @@ class TabsViewController: NSView {
 		for (index, tabView) in tabViews.enumerated() {
 			let isSelected = index == selectedTabIndex
 			let backgroundView = tabBackgroundViews[index]
+			let isHovered = (tabView as? TabView)?.isHovered ?? false
 
 			backgroundView.isActiveTab = isSelected
-			backgroundView.isHidden = !isSelected
+			backgroundView.isHidden = !isSelected && !isHovered
 
-			// Hide separator for selected tab, tab before selected tab, and last tab
 			if index < tabSeparators.count {
-				let hideSeperator = isSelected ||
-				index == tabViews.count - 1 ||
-				index + 1 == selectedTabIndex
-				tabSeparators[index].isHidden = hideSeperator
+				// Hide separators in these cases
+				let nextTabHovered = tabViews.indices.contains(index + 1) ? (tabViews[index + 1] as? TabView)?.isHovered ?? false : false
+				let nextTabSelected = (index + 1 == selectedTabIndex)
+				let isLastTab = index == tabs.count - 1
+
+				let hideSeparator = isSelected ||
+				isHovered ||
+				nextTabSelected ||
+				nextTabHovered ||
+				isLastTab
+
+				tabSeparators[index].isHidden = hideSeparator
 			}
 
 			titleLabels[index].textColor = isSelected ? .labelColor : .secondaryLabelColor
@@ -433,6 +442,7 @@ class TabsViewController: NSView {
 
 		updateTabWidths()
 	}
+
 
 	func updateTabsVisibility() {
 		scrollView.isHidden = tabs.count <= 1

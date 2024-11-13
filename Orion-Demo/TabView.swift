@@ -2,7 +2,7 @@ import Cocoa
 
 class TabView: NSView {
 	private var trackingArea: NSTrackingArea?
-	private var isHovered = false {
+	var isHovered = false {
 		didSet {
 			onHoverStateChanged?(isHovered)
 		}

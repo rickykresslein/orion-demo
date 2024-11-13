@@ -432,7 +432,10 @@ class TabsViewController: NSView {
 				nextTabHovered ||
 				isLastTab
 
-				tabSeparators[index].isHidden = hideSeparator
+				NSAnimationContext.runAnimationGroup { context in
+					context.duration = 0.3
+					tabSeparators[index].animator().alphaValue = hideSeparator ? 0.0 : 1.0
+				}
 			}
 
 			titleLabels[index].textColor = isSelected ? .labelColor : .secondaryLabelColor

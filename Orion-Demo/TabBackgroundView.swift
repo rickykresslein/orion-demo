@@ -49,39 +49,28 @@ class TabBackgroundView: NSView {
 	}
 
 	private func updateAppearance() {
-		if isActiveTab {
-			visualEffectView.isHidden = false
-			visualEffectView.material = .contentBackground
-			visualEffectView.layer?.backgroundColor = nil
-			layer?.shadowOpacity = 0.3
-		} else if isHovered {
-			NSAnimationContext.runAnimationGroup({ context in
-				context.duration = 0.3
-				visualEffectView.animator().isHidden = false
-				visualEffectView.material = .headerView
-				visualEffectView.animator().alphaValue = 0.0
-				visualEffectView.animator().alphaValue = 1.0
-				visualEffectView.layer?.backgroundColor = NSColor.gray.cgColor
-				layer?.shadowOpacity = 0
-			})
-		} else {
-			if visualEffectView.material == .headerView {
-				NSAnimationContext.runAnimationGroup({ context in
-					context.duration = 0.3
-					visualEffectView.material = .windowBackground
-					visualEffectView.animator().alphaValue = 0.0
-					visualEffectView.animator().alphaValue = 1.0
-					visualEffectView.layer?.backgroundColor = nil
-					visualEffectView.animator().isHidden = true
-					layer?.shadowOpacity = 0
-				})
-			} else {
-				visualEffectView.isHidden = true
+		NSAnimationContext.runAnimationGroup({ context in
+			context.duration = 0.3
+
+			if isActiveTab {
+				visualEffectView.material = .contentBackground
 				visualEffectView.layer?.backgroundColor = nil
+				visualEffectView.animator().alphaValue = 1.0
+				layer?.shadowOpacity = 0.3
+			} else if isHovered {
+				visualEffectView.material = .headerView
+				visualEffectView.layer?.backgroundColor = NSColor.gray.cgColor
+				visualEffectView.animator().alphaValue = 1.0
+				layer?.shadowOpacity = 0
+			} else {
+				visualEffectView.material = .windowBackground
+				visualEffectView.layer?.backgroundColor = nil
+				visualEffectView.animator().alphaValue = 0.0
 				layer?.shadowOpacity = 0
 			}
-		}
+		})
 	}
+
 
 	required init?(coder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")

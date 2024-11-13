@@ -413,16 +413,20 @@ class TabsViewController: NSView {
 			let backgroundView = tabBackgroundViews[index]
 			let isHovered = (tabView as? TabView)?.isHovered ?? false
 
+			backgroundView.isHidden = false
 			backgroundView.isActiveTab = isSelected
+			backgroundView.isHovered = isHovered
 
-			// Wait for fade-out animation to complete before updating appearance
+			// Wait for fade-out animation to complete before hiding
 			DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-				backgroundView.isHidden = !isSelected && !isHovered
+				if !backgroundView.isActiveTab && !backgroundView.isHovered {
+					backgroundView.isHidden = true
+				}
 			}
 
 			if index < tabSeparators.count {
-				// Hide separators in these cases
-				let nextTabHovered = tabViews.indices.contains(index + 1) ? (tabViews[index + 1] as? TabView)?.isHovered ?? false : false
+				let nextTabHovered = tabViews.indices.contains(index + 1) ?
+				(tabViews[index + 1] as? TabView)?.isHovered ?? false : false
 				let nextTabSelected = (index + 1 == selectedTabIndex)
 				let isLastTab = index == tabs.count - 1
 
@@ -442,7 +446,8 @@ class TabsViewController: NSView {
 
 			if let faviconImageView = tabView.subviews[2] as? FaviconImageView,
 			   let titleLabel = tabView.subviews.last as? NSTextField {
-				faviconImageView.updateFavicon(tabs[index].favicon ?? NSImage(systemSymbolName: "globe", accessibilityDescription: "Default favicon"))
+				faviconImageView.updateFavicon(tabs[index].favicon ??
+											   NSImage(systemSymbolName: "globe", accessibilityDescription: "Default favicon"))
 				titleLabel.stringValue = tabs[index].title
 			}
 		}

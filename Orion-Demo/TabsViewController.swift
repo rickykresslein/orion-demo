@@ -248,54 +248,65 @@ class TabsViewController: NSView {
 	}
 
 	private func updateTabWidths() {
-		guard !tabs.isEmpty else {
-			return
-		}
+		guard !tabs.isEmpty else { return }
 
-		let availableWidth = bounds.width
+		let availableWidth = bounds.width - 10
 		let tabCount = CGFloat(tabs.count)
+		let spacingWidth = stackView.spacing * (tabCount - 1)
+		let effectiveAvailableWidth = availableWidth - spacingWidth
 
 		let selectedTabDesiredWidth = min(
 			calculateIdealTabWidth(for: selectedTabIndex),
 			preferredTabWidth
 		)
 
-		let remainingWidth = availableWidth - selectedTabDesiredWidth
+		let remainingWidth = effectiveAvailableWidth - selectedTabDesiredWidth
 		let nonSelectedTabCount = tabCount - 1
 
-		var nonSelectedTabWidth = nonSelectedTabCount > 0 ? remainingWidth / nonSelectedTabCount : 0
-		nonSelectedTabWidth = min(nonSelectedTabWidth, preferredTabWidth)
-		nonSelectedTabWidth = max(nonSelectedTabWidth, minimumTabWidth)
+		var nonSelectedTabWidth: CGFloat = 0
+		if nonSelectedTabCount > 0 {
+			nonSelectedTabWidth = remainingWidth / nonSelectedTabCount
+			nonSelectedTabWidth = min(nonSelectedTabWidth, preferredTabWidth)
+			nonSelectedTabWidth = max(nonSelectedTabWidth, minimumTabWidth)
+		}
 
-		var totalWidth: CGFloat = 0
+		if nonSelectedTabWidth < minimumTabWidth {
+			let equalWidth = effectiveAvailableWidth / tabCount
+			nonSelectedTabWidth = equalWidth
+			let selectedTabWidth = equalWidth
 
-		for (i, constraint) in tabWidthConstraints.enumerated() {
-			let isSelected = i == selectedTabIndex
-			let newTabWidth = isSelected ? selectedTabDesiredWidth : nonSelectedTabWidth
-
-			constraint.constant = newTabWidth
-			totalWidth += newTabWidth
-
-			let isCompressed = isSelected ? (newTabWidth < 60) : (newTabWidth <= minimumTabWidth + 10)
-			titleLabels[i].isHidden = isCompressed
-
-			faviconConstraints[i].leading.isActive = false
-			faviconConstraints[i].center.isActive = false
-			faviconToTitleConstraints[i].isActive = false
-			titleToTrailingConstraints[i].isActive = false
-
-			if isCompressed {
-				// Centered favicon only
-				faviconConstraints[i].center.isActive = true
-			} else {
-				// Leading favicon with title
-				faviconConstraints[i].leading.isActive = true
-				faviconToTitleConstraints[i].isActive = true
-				titleToTrailingConstraints[i].isActive = true
+			for (i, constraint) in tabWidthConstraints.enumerated() {
+				let width = max(minimumTabWidth, selectedTabWidth)
+				constraint.constant = width
+				updateTabAppearanceForWidth(at: i, width: width)
+			}
+		} else {
+			for (i, constraint) in tabWidthConstraints.enumerated() {
+				let width = (i == selectedTabIndex) ? selectedTabDesiredWidth : nonSelectedTabWidth
+				constraint.constant = width
+				updateTabAppearanceForWidth(at: i, width: width)
 			}
 		}
 
-		stackView.frame.size.width = totalWidth
+		layoutSubtreeIfNeeded()
+	}
+
+	private func updateTabAppearanceForWidth(at index: Int, width: CGFloat) {
+		let isCompressed = width <= minimumTabWidth + 10
+		titleLabels[index].isHidden = isCompressed
+
+		faviconConstraints[index].leading.isActive = false
+		faviconConstraints[index].center.isActive = false
+		faviconToTitleConstraints[index].isActive = false
+		titleToTrailingConstraints[index].isActive = false
+
+		if isCompressed {
+			faviconConstraints[index].center.isActive = true
+		} else {
+			faviconConstraints[index].leading.isActive = true
+			faviconToTitleConstraints[index].isActive = true
+			titleToTrailingConstraints[index].isActive = true
+		}
 	}
 
 	private func calculateIdealTabWidth(for index: Int) -> CGFloat {
